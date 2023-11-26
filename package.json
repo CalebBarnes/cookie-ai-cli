@@ -1,0 +1,29 @@
+{
+  "name": "ai-cli",
+  "version": "1.0.0",
+  "bin": {
+    "ai-cli": "./dist/index.js"
+  },
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "npx tsc && node ./dist/index.js rename my git branch"
+  },
+  "targets": {
+    "node": "20.9.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "figlet": "^1.7.0",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}
