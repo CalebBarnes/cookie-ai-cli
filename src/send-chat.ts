@@ -1,8 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { type Response } from "./response-schema";
-import ora from "ora";
-import cliSpinners from "cli-spinners";
 
 const schema = fs.readFileSync(
   path.join(__dirname, "response-schema.ts"),
