@@ -6,7 +6,7 @@
   },
   "description": "",
   "scripts": {
-    "start": "bun run ./src/main.ts",
+    "start": "bun run ./src/main.ts --debug",
     "build": "bun build --target=bun ./src/main.ts --outfile=./dist/main.js",
     "dev": "bun --watch ./src/main.ts"
   },

@@ -5,21 +5,30 @@ import { sendChat } from "./send-chat";
 import { exec } from "node:child_process";
 
 async function main() {
+  let isDebug = false;
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   let userPrompt: string | undefined = process.argv.slice(2).join(" ");
+  if (userPrompt?.includes("--debug")) {
+    userPrompt = userPrompt.replace("--debug", "");
+    isDebug = true;
+  }
+
   if (!userPrompt) {
-    userPrompt = await askQuestion(rl, "What do you want to do? ");
+    userPrompt = await askQuestion(rl, "Enter your command: ");
   }
 
   // if (!userPrompt) {
   //   userPrompt = "rename my git branch";
   // }
-  if (!userPrompt) {
-    userPrompt = "list files in this dir";
+  // if (!userPrompt && isDebug) {
+  //   userPrompt = "list files in this dir";
+  // }
+  if (!userPrompt && isDebug) {
+    userPrompt = "delete the file named index copy.ts";
   }
 
   // console.log(
@@ -28,18 +37,19 @@ async function main() {
 
   const result = await sendChat(userPrompt);
 
-  // if (result?.action) {
-  //   console.log(
-  //     `${chalk.underline("action")} ${chalk.yellowBright(result.action)}`
-  //   );
-  // }
-  // if (result?.description) {
-  //   console.log(
-  //     `${chalk.underline("description")} ${chalk.red(result.description)}\n`
-  //   );
-  // }
-
-  // console.log({ result });
+  if (isDebug) {
+    if (result?.action) {
+      console.log(
+        `${chalk.underline("action")} ${chalk.yellowBright(result.action)}`
+      );
+    }
+    if (result?.description) {
+      console.log(
+        `${chalk.underline("description")} ${chalk.red(result.description)}\n`
+      );
+    }
+    console.log({ result });
+  }
 
   if (result.action === "command") {
     await handleCommand({
@@ -109,9 +119,11 @@ async function handleCommand({
 
   const answer = await askQuestion(rl, `Run this command? (y/n) `);
   if (answer === "y") {
-    exec(fullCommand, (error, stdout, stderr) => {
+    exec(fullCommand, async (error, stdout, stderr) => {
       if (error) {
         console.log(`error: ${error.message}`);
+        const result = await sendChat(error.message);
+        console.log({ result });
         return;
       }
 

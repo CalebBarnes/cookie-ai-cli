@@ -25,6 +25,17 @@ Respond only in JSON that satisfies the Response type:
 ${schema}
 `;
 
+const url = "http://192.168.8.162:5000/v1/chat/completions";
+
+let payload = {
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "system", content: systemInstructions }],
+  temperature: 0.7,
+  mode: "instruct",
+  instruction_template: "Alpaca",
+  response_format: { type: "json_object" },
+};
+
 export async function sendChat(message: string): Promise<Response> {
   // const spinner = ora({
   //   text: "Thinking...",
@@ -32,7 +43,7 @@ export async function sendChat(message: string): Promise<Response> {
   //   color: "green",
   // }).start();
 
-  const content = await getResponse(message);
+  const content = await getResponse({ message });
   const isJson: boolean = content?.includes("{");
 
   let result: Response;
@@ -62,12 +73,13 @@ export async function sendChat(message: string): Promise<Response> {
   return result;
 }
 
-const getResponse = async (message: string) => {
-  const payload = { ...baseData };
+const getResponse = async ({ message }: { message: string }) => {
   payload.messages.push({
     role: "user",
     content: message,
   });
+  // console.log("update payload with user message: ", { payload });
+
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -77,16 +89,11 @@ const getResponse = async (message: string) => {
   });
 
   const json = await response.json();
-  const content = json?.choices?.[0]?.message?.content;
-  return content;
-};
 
-const url = "http://192.168.8.162:5000/v1/chat/completions";
-const baseData = {
-  model: "gpt-3.5-turbo",
-  messages: [{ role: "system", content: systemInstructions }],
-  temperature: 0.7,
-  mode: "instruct",
-  instruction_template: "Alpaca",
-  response_format: { type: "json_object" },
+  const content = json?.choices?.[0]?.message?.content;
+
+  // payload.messages.push(json.choices[0].message);
+  // console.log("update payload with response message: ", { payload });
+
+  return content;
 };
