@@ -129,7 +129,7 @@ async function handleCommand({
 
       console.log(chalk.green("\nCommand executed: ", fullCommand, "\n"));
       console.log(stdout);
-
+      console.log(stderr);
       // if (stderr) {
       //   console.log("STDERR: ", stderr);
       //   // await sendChat({ isError: true, message: stderr, rl });
