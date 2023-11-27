@@ -132,7 +132,7 @@ async function handleCommand({
 
       if (stderr) {
         console.log("STDERR: ", stderr);
-        await sendChat({ isError: true, message: stderr, rl });
+        // await sendChat({ isError: true, message: stderr, rl });
       }
     });
   } else {
