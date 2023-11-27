@@ -73,7 +73,7 @@ export async function sendChat({
 
   const responseJson = await response.json();
   const aiResponseContent = responseJson?.choices?.[0]?.message?.content;
-  payload.messages.push(responseJson?.choices?.[0]?.message);
+
   // console.log("aiResponseContent: ");
   // console.log(aiResponseContent);
 
@@ -86,6 +86,7 @@ export async function sendChat({
 
   try {
     pamperedResponseData = JSON.parse(json);
+    payload.messages.push(responseJson?.choices?.[0]?.message);
     await handleAction({ result: pamperedResponseData, rl });
   } catch (error) {
     console.log(chalk.red("Result is not valid JSON, failed to parse"));

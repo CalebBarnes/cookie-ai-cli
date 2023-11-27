@@ -4,8 +4,13 @@ import chalk from "chalk";
 import { sendChat } from "./send-chat";
 import { exec } from "node:child_process";
 
+async function promptUser({ rl }) {
+  let answer = await askQuestion(rl, "Enter your command: ");
+  await sendChat({ message: answer, rl });
+  return answer;
+}
+
 async function main() {
-  let isDebug = false;
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -14,28 +19,13 @@ async function main() {
   let userPrompt: string | undefined = process.argv.slice(2).join(" ");
   if (userPrompt?.includes("--debug")) {
     userPrompt = userPrompt.replace("--debug", "");
-    isDebug = true;
   }
 
   if (!userPrompt) {
-    userPrompt = await askQuestion(rl, "Enter your command: ");
+    await promptUser({ rl });
+  } else {
+    await sendChat({ message: userPrompt, rl });
   }
-
-  // if (!userPrompt) {
-  //   userPrompt = "rename my git branch";
-  // }
-  // if (!userPrompt && isDebug) {
-  //   userPrompt = "list files in this dir";
-  // }
-  if (!userPrompt && isDebug) {
-    userPrompt = `delete the file named "index copy.ts"`;
-  }
-
-  // console.log(
-  //   `\n${chalk.underline("user prompt")} ${chalk.green(userPrompt)}\n`
-  // );
-
-  await sendChat({ message: userPrompt, rl });
 }
 main();
 
@@ -89,6 +79,7 @@ export async function handleAction({ result, rl }) {
       rl,
     });
   }
+  promptUser({ rl });
 }
 
 async function handleCommand({
@@ -96,49 +87,58 @@ async function handleCommand({
   command,
   values,
   description,
+  commandFinishedCallback,
 }: {
   rl: readline.Interface;
   command: string;
   values?: Record<string, string>;
   description?: string;
+  commandFinishedCallback?: () => void;
 }) {
-  let fullCommand = command;
-  if (values) {
-    fullCommand = command.replaceAll(/{(\w+)}/g, (_, match) => {
-      const keyWithBraces = `{${match}}`; // Construct the key with curly braces
-      return values[keyWithBraces] || `{${match}}`; // Replace with value or keep the placeholder if value is not found
-    });
-  }
+  return new Promise(async (resolve, reject) => {
+    let fullCommand = command;
+    if (values) {
+      fullCommand = command.replaceAll(/{(\w+)}/g, (_, match) => {
+        const keyWithBraces = `{${match}}`; // Construct the key with curly braces
+        return values[keyWithBraces] || `{${match}}`; // Replace with value or keep the placeholder if value is not found
+      });
+    }
 
-  console.log(`${chalk.underline("command")}: ${chalk.red(fullCommand)}`);
-  if (description) {
-    console.log(
-      `${chalk.underline("description")}: ${chalk.yellow(description)}`
-    );
-  }
+    console.log(`${chalk.underline("command")}: ${chalk.red(fullCommand)}`);
+    if (description) {
+      console.log(
+        `${chalk.underline("description")}: ${chalk.yellow(description)}`
+      );
+    }
 
-  const answer = await askQuestion(rl, `Run this command? (y/n) `);
-  if (answer === "y") {
-    exec(fullCommand, async (error, stdout, stderr) => {
-      if (error) {
-        // console.log(`error: ${error.message}`);
-        await sendChat({ isError: true, message: error.message, rl });
-        // console.log({ result });
-        return;
-      }
+    const answer = await askQuestion(rl, `Run this command? (y/n) `);
+    if (answer === "y") {
+      const proc = exec(fullCommand, async (error, stdout, stderr) => {
+        if (error) {
+          // console.log(`error: ${error.message}`);
+          await sendChat({ isError: true, message: error.message, rl });
+          // console.log({ result });
+          return;
+        }
 
-      console.log(chalk.green("\nCommand executed: ", fullCommand, "\n"));
-      console.log(stdout);
-      console.log(stderr);
-      // if (stderr) {
-      //   console.log("STDERR: ", stderr);
-      //   // await sendChat({ isError: true, message: stderr, rl });
-      // }
-    });
-  } else {
-    console.log("Command aborted.");
-    process.exit(0);
-  }
+        console.log(chalk.green("\nCommand executed: ", fullCommand, "\n"));
+        console.log(stdout);
+        console.log(stderr);
+      });
+
+      // Listen to the close event
+      proc.on("close", (code) => {
+        console.log(`Child process exited with code ${code}`);
+        commandFinishedCallback?.();
+        resolve(code);
+        // Perform any cleanup or additional actions needed after process exit
+      });
+    } else {
+      console.log("Command aborted.");
+      reject();
+      process.exit(0);
+    }
+  });
 }
 
 function askQuestion(rl, query): Promise<string | undefined> {
