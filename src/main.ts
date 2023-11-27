@@ -127,13 +127,13 @@ async function handleCommand({
         return;
       }
 
-      console.log(chalk.green("Command executed:"));
+      console.log(chalk.green("\nCommand executed:"));
       console.log(stdout);
 
-      if (stderr) {
-        console.log("STDERR: ", stderr);
-        // await sendChat({ isError: true, message: stderr, rl });
-      }
+      // if (stderr) {
+      //   console.log("STDERR: ", stderr);
+      //   // await sendChat({ isError: true, message: stderr, rl });
+      // }
     });
   } else {
     console.log("Command aborted.");
