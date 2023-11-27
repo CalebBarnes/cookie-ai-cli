@@ -87,13 +87,11 @@ async function handleCommand({
   command,
   values,
   description,
-  commandFinishedCallback,
 }: {
   rl: readline.Interface;
   command: string;
   values?: Record<string, string>;
   description?: string;
-  commandFinishedCallback?: () => void;
 }) {
   return new Promise(async (resolve, reject) => {
     let fullCommand = command;
@@ -113,6 +111,7 @@ async function handleCommand({
 
     const answer = await askQuestion(rl, `Run this command? (y/n) `);
     if (answer === "y") {
+      console.log(chalk.green("Executing command: "), chalk.blue(fullCommand));
       const proc = exec(fullCommand, async (error, stdout, stderr) => {
         if (error) {
           // console.log(`error: ${error.message}`);
@@ -121,17 +120,19 @@ async function handleCommand({
           return;
         }
 
-        console.log(chalk.green("\nCommand executed: ", fullCommand, "\n"));
-        console.log(stdout);
-        console.log(stderr);
+        if (stdout) console.log(stdout);
+        if (stderr) console.log(stderr);
       });
 
       // Listen to the close event
       proc.on("close", (code) => {
-        console.log(`Child process exited with code ${code}`);
-        commandFinishedCallback?.();
+        if (code === 0) {
+          console.log(chalk.green("Command completed."));
+        } else {
+          console.log(chalk.red("Command exited with error code: ", code));
+        }
+
         resolve(code);
-        // Perform any cleanup or additional actions needed after process exit
       });
     } else {
       console.log("Command aborted.");
