@@ -58,24 +58,7 @@ export interface UserInfoRequiredMessageContent {
   description: string;
 }
 
-export interface ErrorMessageContent {
-  /**
-   * The action to use when an error needs to be communicated to the user.
-   */
-  action: "error";
-  /**
-   * The error message to display.
-   */
-  message: string;
-
-  /**
-   * An optional description of the error.
-   */
-  description?: string;
-}
-
 export type Response =
   | CommandMessageContent
   | CommandListMessageContent
-  | UserInfoRequiredMessageContent
-  | ErrorMessageContent;
+  | UserInfoRequiredMessageContent;

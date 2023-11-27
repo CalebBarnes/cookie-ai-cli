@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { type Response } from "./response-schema";
+import chalk from "chalk";
+import { handleAction } from "./main";
 
 const schema = fs.readFileSync(
   path.join(__dirname, "response-schema.ts"),
@@ -11,6 +13,10 @@ const systemInstructions = `
 You are an AI Terminal Assistant. 
 Used to automate cli commands for users who prompt with natural language.
 Your responses will be automatically parsed by a tool using JSON.parse().
+
+If you ever need to use the rm command on a file with spaces in the name,
+wrap the file name in quotes. Since your response will be json parsed, make sure you escape the quotes around the file name. Example:
+User Prompt: delete the file named "index copy.ts"
 
 Example:
 User Prompt: rename my git branch to add-dropdown
@@ -36,50 +42,26 @@ let payload = {
   response_format: { type: "json_object" },
 };
 
-export async function sendChat(message: string): Promise<Response> {
-  // const spinner = ora({
-  //   text: "Thinking...",
-  //   spinner: cliSpinners.dots,
-  //   color: "green",
-  // }).start();
-
-  const content = await getResponse({ message });
-  const isJson: boolean = content?.includes("{");
-
-  let result: Response;
-
-  if (isJson) {
-    const json = content?.slice(
-      content.indexOf("{"),
-      content.lastIndexOf("}") + 1
-    );
-
-    try {
-      result = JSON.parse(json);
-      // spinner.stop();
-    } catch (error) {
-      result = { action: "error", message: "AI result was not valid JSON" };
-      console.log({ content });
-
-      // spinner.fail("Result is not valid JSON");
-    }
-  } else {
-    result = { action: "error", message: "AI result was not valid JSON" };
-    console.log("no json { detected");
-    console.log({ content });
-
-    // spinner.fail("Result is not valid JSON");
+export async function sendChat({
+  message,
+  rl,
+  isError,
+}: {
+  message: string;
+  rl: any;
+  isError?: boolean;
+}): Promise<Response> {
+  const isDebug = process.argv.slice(2).join(" ").includes("--debug");
+  if (isDebug) {
+    console.log(chalk.cyan("user: "), message);
   }
-  return result;
-}
-
-const getResponse = async ({ message }: { message: string }) => {
   payload.messages.push({
-    role: "user",
-    content: message,
+    role: !isError ? "user" : "system",
+    content: !isError ? message : `error with last command: ${message}`,
   });
-  // console.log("update payload with user message: ", { payload });
 
+  // console.log({ payload });
+  console.log(chalk.yellow("🤔 AI thinking..."));
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -87,13 +69,33 @@ const getResponse = async ({ message }: { message: string }) => {
     },
     body: JSON.stringify(payload),
   });
+  console.log(chalk.green("✅ AI responded!"));
 
-  const json = await response.json();
+  const responseJson = await response.json();
+  const aiResponseContent = responseJson?.choices?.[0]?.message?.content;
+  payload.messages.push(responseJson?.choices?.[0]?.message);
+  // console.log("aiResponseContent: ");
+  // console.log(aiResponseContent);
 
-  const content = json?.choices?.[0]?.message?.content;
+  let pamperedResponseData; // Response;
 
-  // payload.messages.push(json.choices[0].message);
-  // console.log("update payload with response message: ", { payload });
+  const json = aiResponseContent?.slice(
+    aiResponseContent.indexOf("{"),
+    aiResponseContent.lastIndexOf("}") + 1
+  );
 
-  return content;
-};
+  try {
+    pamperedResponseData = JSON.parse(json);
+    await handleAction({ result: pamperedResponseData, rl });
+  } catch (error) {
+    console.log(chalk.red("Result is not valid JSON, failed to parse"));
+
+    sendChat({
+      isError: true,
+      message: "Your response was not valid JSON. Please try again.",
+      rl,
+    });
+  }
+
+  return pamperedResponseData;
+}

@@ -6,9 +6,9 @@
   },
   "description": "",
   "scripts": {
-    "start": "bun run ./src/main.ts --debug",
+    "start": "bun run ./src/main.ts",
     "build": "bun build --target=bun ./src/main.ts --outfile=./dist/main.js",
-    "dev": "bun --watch ./src/main.ts"
+    "dev": "bun --watch ./src/main.ts  --debug"
   },
   "targets": {
     "node": "20.9.0"
