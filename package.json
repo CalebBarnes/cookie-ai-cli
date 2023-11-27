@@ -2,13 +2,13 @@
   "name": "ai-cli",
   "version": "1.0.0",
   "bin": {
-    "ai-cli": "./dist/index.js"
+    "ai-cli": "./dist/main.js"
   },
   "description": "",
-  "main": "src/index.ts",
   "scripts": {
-    "build": "npx tsc",
-    "start": "npx tsc && node ./dist/index.js rename my git branch"
+    "start": "bun run ./src/main.ts",
+    "build": "bun build --target=bun ./src/main.ts --outfile=./dist/main.js",
+    "dev": "bun --watch ./src/main.ts"
   },
   "targets": {
     "node": "20.9.0"
@@ -18,9 +18,12 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.3.0",
+    "cli-spinners": "^2.9.2",
     "commander": "^11.1.0",
+    "dumper.js": "^1.3.1",
     "figlet": "^1.7.0",
-    "ora": "^7.0.1"
+    "ora": "^7.0.1",
+    "typechat": "^0.0.10"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

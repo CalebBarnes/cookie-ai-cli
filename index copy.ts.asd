@@ -3,6 +3,17 @@ const readline = require("readline");
 let ora;
 let chalk;
 
+const mockData = {
+  user_info_required: {
+    action: "user_info_required",
+    suggested_command: "ssh-copy-id {user}@{hostname}",
+    values: [
+      { label: "Enter your username: ", value: "{user}" },
+      { label: "Enter your hostname: ", value: "{hostname}" },
+    ],
+  },
+};
+
 let body = {
   model: "gpt-3.5-turbo",
   messages: [
@@ -25,8 +36,12 @@ body.messages.push({
 async function main() {
   ora = (await import("ora")).default;
   chalk = (await import("chalk")).default;
-
   const spinner = ora("Thinking...").start();
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
   const res = await fetch(`http://192.168.8.162:5000/v1/chat/completions`, {
     method: "POST",
@@ -36,20 +51,25 @@ async function main() {
     body: JSON.stringify(body),
   });
 
-  const json = await res.json();
-
-  spinner.stopAndPersist({
-    symbol: "🤙",
-    text: "AI Response Generated",
-  });
-
-  const aiResponse = json?.choices?.[0]?.message?.content;
-  if (!aiResponse) {
-    spinner.fail("Unexpected response from API");
-    console.log(json);
-    return;
-  }
   try {
+    const json = await res.json().catch((e) => {
+      console.log(e);
+      spinner.fail("Failed to parse response json");
+    });
+
+    const aiResponse = json?.choices?.[0]?.message?.content;
+
+    spinner.stopAndPersist({
+      symbol: "🤙",
+      text: "AI Response Generated",
+    });
+
+    if (!aiResponse) {
+      spinner.fail("Unexpected response from API");
+      console.log(json);
+      return;
+    }
+
     const unescapedResponse = aiResponse
       .replace(/\\n/g, "\n")
       .replace(/\\r/g, "\r");
@@ -59,6 +79,7 @@ async function main() {
     switch (parsedResponse?.action) {
       case "command":
         await handleCommand({
+          rl,
           command: parsedResponse.command,
           description: parsedResponse.description,
         });
@@ -67,6 +88,7 @@ async function main() {
       case "command_list":
         for (const command of parsedResponse.commands) {
           await handleCommand({
+            rl,
             command,
             description: parsedResponse.description,
           });
@@ -74,18 +96,17 @@ async function main() {
         break;
 
       case "user_info_required":
-        const rl = readline.createInterface({
-          input: process.stdin,
-          output: process.stdout,
-        });
-
         const values = {};
-        // Ask each question in sequence
-        for (const value of parsedResponse.values) {
-          const answer = await askQuestion(rl, value.label);
-          values[value.value] = answer;
+
+        try {
+          // Ask each question in sequence
+          for (const value of parsedResponse.values) {
+            const answer = await askQuestion(rl, value.label);
+            values[value.value] = answer;
+          }
+        } catch (error) {
+          console.error("Error getting user input: ", error);
         }
-        rl.close();
 
         if (parsedResponse.suggested_command_list) {
           let updatedCommandList = parsedResponse.suggested_command_list;
@@ -97,6 +118,7 @@ async function main() {
 
           for (const command of updatedCommandList) {
             await handleCommand({
+              rl,
               command,
               description: parsedResponse.description,
             });
@@ -109,6 +131,7 @@ async function main() {
           }
 
           await handleCommand({
+            rl,
             command: updatedCommandStr,
             description: parsedResponse.description,
           });
@@ -123,15 +146,12 @@ async function main() {
     spinner.fail("Failed to fetch data");
     console.error(e);
   }
+  // finally {
+  //   rl.close(); // Close readline interface only after all operations are complete
+  // }
 }
 
-main();
-
-async function handleCommand({ command, description }) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+async function handleCommand({ rl, command, description }) {
   return await new Promise((resolve) => {
     rl.question(
       `${description ? `${chalk.cyan(description)}\n` : ``}${chalk.red(
@@ -149,14 +169,12 @@ async function handleCommand({ command, description }) {
               }
               console.log("stdout: ", stdout);
               console.log("stderr: ", stderr);
-              rl.close();
               resolve(null);
             }
           );
         } else {
           // User did not agree to run the command
           console.log("Command execution cancelled.");
-          rl.close();
           resolve(null);
         }
       }
@@ -166,9 +184,15 @@ async function handleCommand({ command, description }) {
 
 // Function to handle asking a question
 function askQuestion(rl, query) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     rl.question(chalk.green(query), (answer) => {
-      resolve(answer);
+      if (answer) {
+        resolve(answer);
+      } else {
+        reject(new Error("No answer provided"));
+      }
     });
   });
 }
+
+main();
