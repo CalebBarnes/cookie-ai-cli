@@ -76,8 +76,13 @@ export type Settings = {
 };
 
 function validateSettings(settings) {
-  if (!settings.endpoint) {
-    throw new Error(`"endpoint" is required.`);
+  if (
+    (settings.service === "custom" || settings.service === "cloudflare") &&
+    !settings.endpoint
+  ) {
+    throw new Error(
+      `"endpoint" is required when using service "${settings.service}".`
+    );
   }
   if (!settings.service) {
     throw new Error(
