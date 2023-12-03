@@ -116,3 +116,55 @@ ai
 ### Special Characters Handling
 
 Be aware that certain special characters can't be used directly after the ai command. To use characters like ?, !, or ., you must either enter the CLI first or surround your prompt with quotes.
+
+### Error Handling
+
+In case of command errors, Cookie AI CLI is programmed to automatically provide feedback and suggest new commands. This feature is crucial in maintaining an efficient workflow, especially when dealing with complex commands. The tool keeps track of the context from previous commands and errors, ensuring that the user does not have to repeat information, and can quickly move towards a successful execution.
+
+## Command Not Found Handling
+
+When working in the command line, encountering a "command not found" error is common, especially when trying out new commands or in complex workflows. Cookie AI CLI offers a unique feature to assist users in such situations. By integrating with the shell's command not found handler, specifically for Zsh users, the CLI can automatically suggest alternatives or corrections for unrecognized commands.
+
+### Integrating with Zsh
+
+To enable this feature in Zsh, you need to add a custom `command_not_found_handler` function to your `.zshrc` or `.zprofile`. This function gets triggered whenever you enter a command that Zsh cannot find. It then passes this command to Cookie AI CLI for intelligent processing and suggestions.
+
+Here's how you can set it up:
+
+1. Edit .zshrc or .zprofile:
+   Open your .zshrc or .zprofile file in a text editor. You can usually find these files in your home directory (~).
+
+2. Add the Custom Handler Function:
+   Append the following function to the file:
+
+   ```bash
+   command_not_found_handler() {
+       echo "zsh: command not found: $@\nAsking AI for help..."
+       ai "zsh: command not found: $@"
+       # return 127
+   }
+   ```
+
+   This function:
+
+   - Outputs a message to inform you that the entered command was not found.
+   - Calls the `ai` command with the unrecognized command as an argument.
+   - (Optional) You can uncomment `return 127` if you want the function to return the standard error code for a command not found.
+
+3. Save and Reload:
+
+   Save your changes and reload the shell configuration by running `source ~/.zshrc` or `source ~/.zprofile`, depending on which file you edited.
+
+### Example Usage
+
+When you type a command that is not recognized, the command_not_found_handler will automatically invoke Cookie AI CLI to analyze the input. For example:
+
+```bash
+$ gitstats
+zsh: command not found: gitstats
+Asking AI for help...
+```
+
+Cookie AI CLI will then process the input and suggest relevant commands or actions, guiding you towards resolving the issue or finding the right command.
+
+This feature enhances the user experience by providing real-time, AI-driven support for command line errors, turning a potentially frustrating situation into a learning opportunity.
