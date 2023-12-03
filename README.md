@@ -123,7 +123,7 @@ In case of command errors, Cookie AI CLI is programmed to automatically provide 
 
 ## Command Not Found Handling
 
-When working in the command line, encountering a "command not found" error is common, especially when trying out new commands or in complex workflows. Cookie AI CLI offers a unique feature to assist users in such situations. By integrating with the shell's command not found handler, specifically for Zsh users, the CLI can automatically suggest alternatives or corrections for unrecognized commands.
+"Command not found" errors, often due to typos or new commands, are common in command lines. Cookie AI CLI assists by integrating with the shell's error handler, suggesting corrections or alternatives for unrecognized commands.
 
 ### Integrating with Zsh
 
@@ -155,7 +155,7 @@ Here's how you can set it up:
 
    Save your changes and reload the shell configuration by running `source ~/.zshrc` or `source ~/.zprofile`, depending on which file you edited.
 
-### Example Usage
+### Example Usage in Zsh
 
 When you type a command that is not recognized, the command_not_found_handler will automatically invoke Cookie AI CLI to analyze the input. For example:
 
@@ -168,3 +168,45 @@ Asking AI for help...
 Cookie AI CLI will then process the input and suggest relevant commands or actions, guiding you towards resolving the issue or finding the right command.
 
 This feature enhances the user experience by providing real-time, AI-driven support for command line errors, turning a potentially frustrating situation into a learning opportunity.
+
+### Setting up in Bash
+
+To enable this feature in bash, you need to define a function in your `.bashrc` or `.bash_profile` that handles the "command not found" scenario. The function will send the unrecognized command to Cookie AI CLI for suggestions.
+
+Here's how to do it:
+
+1. Edit `.bashrc` or `.bash_profile`:
+   Open your `.bashrc` or `.bash_profile` file in a text editor. These files are typically located in your home directory (~).
+2. Add the Handler Function:
+   Add the following function to your `.bashrc` or `.bash_profile`:
+
+   ```bash
+   command_not_found_handle() {
+     echo "bash: command not found: $1"
+     echo "Asking AI for help..."
+     ai "bash: command not found: $1"
+   }
+
+   ```
+
+   This function will:
+
+   - Notify you that the entered command was not found.
+   - Invoke the `ai` command with the unrecognized command as an argument.
+
+3. Save and Reload:
+   After saving your changes, apply them by running `source ~/.bashrc` or `source ~/.bash_profile`, depending on which file you edited.
+
+### Example Usage in Bash
+
+Now, whenever you type a command that Bash does not recognize, the `command_not_found_handle` function will automatically call Cookie AI CLI to analyze the input and suggest appropriate actions. For instance:
+
+```bash
+$ unknowncommand
+bash: command not found: unknowncommand
+Asking AI for help...
+```
+
+The CLI will then process the input, offering relevant commands or guidance to resolve the issue or discover the correct command.
+
+This integration enhances the Bash user experience by providing immediate, AI-driven support for command line errors, transforming challenges into informative interactions.
