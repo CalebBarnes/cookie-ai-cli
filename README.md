@@ -30,6 +30,14 @@ This will make the ai command available globally on your system.
 
 ## Configuration
 
+### Requirements
+
+The cli is executed with [Bun](https://bun.sh/). You can install it with the following command:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
 ### Initialization
 
 Start by initializing your configuration:
