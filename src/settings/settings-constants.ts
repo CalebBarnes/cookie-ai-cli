@@ -10,11 +10,13 @@ const kernelVersion = os.version();
 export const settingsDir = `${homeDir}/.cookie-ai`;
 export const settingsFileName = `settings.json`;
 export const settingsFilePath = `${settingsDir}/${settingsFileName}`;
+const dirName = import.meta.dir;
 
-const schemaString = fs.readFileSync(
-  path.join(__dirname, "../ai-response-schema.ts"),
-  "utf8"
-);
+let schemaPath = dirName?.includes("src")
+  ? path.join(dirName, "../ai-response-schema.ts")
+  : path.join(dirName, "../src/ai-response-schema.ts");
+
+const schemaString = fs.readFileSync(schemaPath, "utf8");
 
 export const systemInstructions = `
   You are an AI Terminal Assistant. 
