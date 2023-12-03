@@ -1,37 +1,12 @@
-import fs from "fs";
-import path from "path";
-import { type Response } from "./response-schema";
+import { type Response } from "./ai-response-schema";
 import chalk from "chalk";
-import { handleAction } from "./main";
-
-const schema = fs.readFileSync(
-  path.join(__dirname, "response-schema.ts"),
-  "utf8"
-);
-
-const systemInstructions = `
-You are an AI Terminal Assistant. 
-Used to automate cli commands for users who prompt with natural language.
-Your responses will be automatically parsed by a tool using JSON.parse().
-
-If you ever need to use the rm command on a file with spaces in the name,
-wrap the file name in quotes. Since your response will be json parsed, make sure you escape the quotes around the file name. Example:
-User Prompt: delete the file named "index copy.ts"
-
-Example:
-User Prompt: rename my git branch to add-dropdown
-AI Response:
-{
-  "action": "command",
-  "command": "git branch -m add-dropdown"
-  "description": "Renames the current branch to the new name"
-}
-
-Respond only in JSON that satisfies the Response type:
-${schema}
-`;
-
-const url = "http://192.168.8.162:5000/v1/chat/completions";
+import { getSettings } from "./settings/get-settings";
+import { handleAction } from "./handle-action";
+import {
+  settingsFilePath,
+  systemInstructions,
+} from "./settings/settings-constants";
+import { getEndpoint, getHeaders } from "./settings/get-headers";
 
 let payload = {
   model: "gpt-3.5-turbo",
@@ -51,33 +26,42 @@ export async function sendChat({
   rl: any;
   isError?: boolean;
 }): Promise<Response> {
-  const isDebug = process.argv.slice(2).join(" ").includes("--debug");
-  if (isDebug) {
-    console.log(chalk.cyan("user: "), message);
+  const settings = await getSettings({ rl });
+
+  if (settings.model) {
+    payload.model = settings.model;
   }
+
   payload.messages.push({
     role: !isError ? "user" : "system",
     content: !isError ? message : `error with last command: ${message}`,
   });
 
-  // console.log({ payload });
   console.log(chalk.yellow("🤔 AI thinking..."));
-  const response = await fetch(url, {
+  const response = await fetch(getEndpoint(settings), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getHeaders(settings),
     body: JSON.stringify(payload),
   });
   console.log(chalk.green("✅ AI responded!"));
 
-  const responseJson = await response.json();
+  let responseJson;
+  try {
+    responseJson = await response.json();
+  } catch (err) {
+    console.log(chalk.red("Failed to parse endpoint response as JSON"));
+    console.log(
+      chalk.red(
+        `Check your settings at ${settingsFilePath}, or run \`ai --init\` to reinitialize your settings file.`
+      )
+    );
+    console.error(err);
+    process.exit(1);
+  }
+
   const aiResponseContent = responseJson?.choices?.[0]?.message?.content;
 
-  // console.log("aiResponseContent: ");
-  // console.log(aiResponseContent);
-
-  let pamperedResponseData; // Response;
+  let pamperedResponseData;
 
   const json = aiResponseContent?.slice(
     aiResponseContent.indexOf("{"),
@@ -85,12 +69,15 @@ export async function sendChat({
   );
 
   try {
-    pamperedResponseData = JSON.parse(json);
+    pamperedResponseData = JSON.parse(json) as Response;
     payload.messages.push(responseJson?.choices?.[0]?.message);
     await handleAction({ result: pamperedResponseData, rl });
   } catch (error) {
     console.log(chalk.red("Result is not valid JSON, failed to parse"));
+    console.log("AI Response: ");
+    console.log(aiResponseContent);
 
+    console.log("Asking AI to retry...");
     sendChat({
       isError: true,
       message: "Your response was not valid JSON. Please try again.",
