@@ -17,6 +17,18 @@ ai --init
 The init command will prompt you for your API service, endpoint and optional API key.
 The settings will be stored at `~/.cookie-ai/settings.json`
 
+example using OpenAI Chat GPT-4 API:
+
+```json
+{
+  "service": "openai",
+  "openai": {
+    "key": "<your-open-ai-api-key>"
+  },
+  "model": "gpt-4" // defaults to gpt-3.5-turbo
+}
+```
+
 example settings using your own OpenAI compatible API on your local network:
 
 ```json
@@ -50,18 +62,6 @@ example settings using your own OpenAI compatible API with custom headers includ
   "headers": {
     "Authorization": "Bearer <your-token>",
     "Some-Other-Heaer": "Some-Other-Value"
-  },
-  "model": "gpt-4" // defaults to gpt-3.5-turbo
-}
-```
-
-example settings using OpenAI Chat GPT-4 API:
-
-```json
-{
-  "service": "openai",
-  "openai": {
-    "key": "<your-open-ai-api-key>"
   },
   "model": "gpt-4" // defaults to gpt-3.5-turbo
 }
