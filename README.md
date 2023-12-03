@@ -70,6 +70,8 @@ To use a custom OpenAI-compatible API on your local network:
 
 #### Cloudflare Service
 
+Using a [Cloudflare Service Token](https://developers.cloudflare.com/cloudflare-one/identity/service-tokens/) to access your application secured with [Zero Trust](https://developers.cloudflare.com/cloudflare-one/applications/) rules.
+
 ```json
 {
   "service": "cloudflare",

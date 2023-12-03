@@ -1,6 +1,6 @@
 {
   "name": "cookie-ai-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "bin": {
     "ai": "./dist/main.js"
   },
