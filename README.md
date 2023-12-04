@@ -1,6 +1,6 @@
 # Cookie AI CLI
 
-[![npm version](https://badge.fury.io/js/cookie-ai-cli.svg?v=1)](https://badge.fury.io/js/cookie-ai-cli)
+[![npm version](https://badge.fury.io/js/cookie-ai-cli.svg?v=1.3.1)](https://badge.fury.io/js/cookie-ai-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
