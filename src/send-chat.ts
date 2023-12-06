@@ -7,14 +7,39 @@ import {
   systemInstructions,
 } from "./settings/settings-constants";
 import { getEndpoint, getHeaders } from "./settings/get-headers";
+import { isDebug } from "./main";
 
 let payload = {
-  model: "gpt-3.5-turbo",
+  model: "gpt-4",
   messages: [{ role: "system", content: systemInstructions }],
   temperature: 0.7,
-  mode: "instruct",
-  instruction_template: "Alpaca",
-  response_format: { type: "json_object" },
+} as {
+  /**
+   * ID of the model to use for chat completion.
+   * See the model endpoint compatibility table for details on which models work with the Chat API.
+   * @see https://platform.openai.com/docs/models/model-endpoint-compatibility
+   */
+  model: string;
+  /**
+   * A list of messages comprising the conversation so far.
+   */
+  messages: { role: string; content: string }[];
+  /**
+   *
+   */
+  temperature: number;
+  /**
+   *
+   * Don't use mode if you're using OpenAI's API
+   * For text-generation-webui, valid options are "instruct", "chat", "chat-instruct" and it defaults to "instruct".
+   */
+  mode?: string;
+  /**
+   * Don't use instruction_template if you're using OpenAI's API
+   * An instruction template defined under text-generation-webui/instruction-templates.
+   * If not set, the correct template will be guessed using the regex expressions in models/config.yaml.
+   */
+  instruction_template?: string;
 };
 
 export async function sendChat({
@@ -27,6 +52,10 @@ export async function sendChat({
   isError?: boolean;
 }): Promise<Response> {
   const settings = await getSettings({ rl });
+
+  if (settings.service !== "openai") {
+    payload.instruction_template = "Alpaca";
+  }
 
   if (settings.model) {
     payload.model = settings.model;
@@ -48,6 +77,11 @@ export async function sendChat({
   let responseJson;
   try {
     responseJson = await response.json();
+
+    payload.messages.push(responseJson?.choices?.[0]?.message);
+    if (isDebug) {
+      console.log("payload", payload);
+    }
   } catch (err) {
     console.log(chalk.red("Failed to parse endpoint response as JSON"));
     console.log(

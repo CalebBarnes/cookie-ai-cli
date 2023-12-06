@@ -4,6 +4,8 @@ import { sendChat } from "./send-chat";
 import { initializeSettings } from "./settings/initialize-settings";
 import { promptUser } from "./prompt-user";
 
+export const isDebug = process.argv.includes("--debug");
+
 async function main() {
   const rl = readline.createInterface({
     input: process.stdin,

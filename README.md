@@ -60,7 +60,7 @@ For using OpenAI's Chat GPT-4 API, configure as follows:
   "openai": {
     "key": "<your-open-ai-api-key>"
   },
-  "model": "gpt-4" // defaults to gpt-3.5-turbo
+  "model": "gpt-4" // defaults to gpt-4
 }
 ```
 
@@ -72,7 +72,7 @@ To use a custom OpenAI-compatible API on your local network:
 {
   "service": "custom",
   "endpoint": "http://192.168.8.162:5000/v1/chat/completions",
-  "model": "gpt-4" // defaults to gpt-3.5-turbo
+  "model": "gpt-4" // defaults to gpt-4
 }
 ```
 
@@ -88,7 +88,7 @@ Using a [Cloudflare Service Token](https://developers.cloudflare.com/cloudflare-
     "client_id": "<your client id>",
     "client_secret": "<your client secret>"
   },
-  "model": "gpt-4" // defaults to gpt-3.5-turbo
+  "model": "gpt-4" // defaults to gpt-4
 }
 ```
 
@@ -104,7 +104,7 @@ For including custom headers in each request:
     "Authorization": "Bearer <your-token>",
     "Some-Other-Header": "Some-Other-Value"
   },
-  "model": "gpt-4" // defaults to gpt-3.5-turbo
+  "model": "gpt-4" // defaults to gpt-4
 }
 ```
 
