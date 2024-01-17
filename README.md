@@ -1,5 +1,9 @@
 # Cookie AI CLI
 
+[![cookie-ai-logo-2@0 25x](https://github.com/CalebBarnes/cookie-ai-cli/assets/24890515/4cafa635-3a79-4aff-9b1f-ae8eb12a7cbc)](https://ai.cookiecloud.dev")
+
+
+
 [![npm version](https://badge.fury.io/js/cookie-ai-cli.svg?v=1.3.1)](https://badge.fury.io/js/cookie-ai-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
