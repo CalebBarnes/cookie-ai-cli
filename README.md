@@ -1,6 +1,6 @@
 # Cookie AI CLI
 
-[![cookie-ai-logo-2@0 25x](https://github.com/CalebBarnes/cookie-ai-cli/assets/24890515/4cafa635-3a79-4aff-9b1f-ae8eb12a7cbc)](https://ai.cookiecloud.dev")
+[![cookie-ai-logo-2@0 25x](https://github.com/CalebBarnes/cookie-ai-cli/assets/24890515/4cafa635-3a79-4aff-9b1f-ae8eb12a7cbc)](https://ai.cookiecloud.dev)
 
 
 
