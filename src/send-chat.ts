@@ -78,6 +78,10 @@ export async function sendChat({
   try {
     responseJson = await response.json();
 
+    if (isDebug) {
+      console.log("responseJson", responseJson);
+    }
+
     payload.messages.push(responseJson?.choices?.[0]?.message);
     if (isDebug) {
       console.log("payload", payload);
