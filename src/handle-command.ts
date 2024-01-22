@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { exec } from "node:child_process";
+import { spawn } from "node:child_process";
 import { askQuestion } from "./ask-question";
 import { sendChat } from "./send-chat";
 import readline from "readline";
@@ -34,15 +34,9 @@ export async function handleCommand({
     const answer = await askQuestion(rl, `Run this command? (y/n) `);
     if (answer === "y") {
       console.log(chalk.green("Executing command: "), chalk.blue(fullCommand));
-      const proc = exec(fullCommand, async (error, stdout, stderr) => {
-        if (error) {
-          await sendChat({ isError: true, message: error.message, rl });
-
-          return;
-        }
-
-        if (stdout) console.log(stdout);
-        if (stderr) console.log(stderr);
+      const [bin, ...args] = fullCommand.split(` `)
+      const proc = spawn(bin, args, {
+        stdio: `inherit`,
       });
 
       // Listen to the close event
