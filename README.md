@@ -46,52 +46,6 @@ ai --init
 
 This will prompt for API service, endpoint, and an optional API key. Settings are saved in `~/.cookie-ai/settings.json`.
 
-### Setting Options
-
-Configure your settings based on the service you are using:
-
-#### OpenAI Service
-
-For OpenAI's Chat GPT-4 API:
-
-```json
-{
-  "service": "openai",
-  "openai": {
-    "key": "<your-open-ai-api-key>"
-  },
-  "model": "gpt-4"
-}
-```
-
-#### Custom Local API
-
-For a custom, OpenAI-compatible API on your local network:
-
-```json
-{
-  "service": "custom",
-  "endpoint": "http://192.168.8.162:5000/v1/chat/completions",
-  "model": "gpt-4"
-}
-```
-
-#### Custom Headers
-
-To include custom headers in requests:
-
-```json
-{
-  "service": "custom",
-  "endpoint": "https://<your-endpoint>/v1/chat/completions",
-  "headers": {
-    "Authorization": "Bearer <your-token>",
-    "Some-Other-Header": "Some-Other-Value"
-  },
-  "model": "gpt-4"
-}
-```
-
 ## Usage
 
 Input your prompt after the `ai` command or enter the CLI for more complex prompts:
@@ -105,6 +59,68 @@ For special characters like `?`, `!`, or `.`, use quotes or enter the CLI:
 ```bash
 ai
 > Enter your command: what is my public ip address?
+```
+
+## Settings Configuration
+
+The Cookie AI CLI tool uses a structured settings schema to manage various configuration options. Here’s how to set up and understand the settings for the tool:
+
+### File Location
+
+The settings are stored in a JSON file located at `~/.cookie-ai/settings.json`. You can manually edit this file or run `ai --init` to initialize or update the settings through a guided setup.
+
+### Settings Schema Overview
+
+The settings schema is defined as follows:
+
+- `endpoint`: Optional. A URL string required when using a custom service.
+- `service`: Required. Specifies the service type, either `"custom"` or `"openai"`.
+- `model`: Required. Indicates the model to use (e.g., `"gpt-4"`).
+- `openai`: Optional. Contains OpenAI specific settings.
+  - `key`: Required for the `openai` service. Your OpenAI API key.
+- `custom`: Optional. Contains settings for a custom service.
+  - `payload`: Optional. A record of strings for additional payload data.
+- `headers`: Optional. A record of strings for custom headers in each request.
+
+### Example Configurations
+
+#### OpenAI Service Example
+
+```json
+{
+  "service": "openai",
+  "model": "gpt-4",
+  "openai": {
+    "key": "<your-open-ai-api-key>"
+  }
+}
+```
+
+#### Custom Service Example
+
+```json
+{
+  "service": "custom",
+  "endpoint": "https://<your-custom-endpoint>/v1/chat/completions",
+  "model": "gpt-4",
+  "headers": {
+    "Authorization": "Bearer <your-token>",
+    "Some-Other-Header": "Some-Other-Value"
+  }
+}
+```
+
+#### Custom Payload Example
+
+```json
+{
+  "service": "custom",
+  "endpoint": "https://<your-custom-endpoint>/v1/chat/completions",
+  "model": "gpt-4",
+  "payload": {
+    "instruction_template": "Alpaca"
+  }
+}
 ```
 
 ### Error Handling
