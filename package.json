@@ -13,7 +13,8 @@
     "build": "bun build --target=bun ./src/main.ts --outfile=./dist/main.js",
     "dev": "bun --watch ./src/main.ts rename my git branch",
     "dev:debug": "bun --watch ./src/main.ts rename my git branch --debug",
-    "dev:init": "bun --watch ./src/main.ts --init"
+    "dev:init": "bun --watch ./src/main.ts --init",
+    "dev:error": "bun --watch ./src/main.ts run a simple command that will throw an error in stderr"
   },
   "dependencies": {
     "chalk": "^5.3.0",
