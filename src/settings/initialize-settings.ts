@@ -1,58 +1,53 @@
 import fs from "fs";
 import { saveSettings } from "./save-settings";
-import { settingsDir, settingsFilePath } from "./settings-constants";
+import { services, settingsDir, settingsFilePath } from "./settings-constants";
 import { askQuestion } from "../ask-question";
 import readline from "readline";
-
-import { Settings, services } from "./get-settings";
-import chalk from "chalk";
+import { Settings } from "./settings-schema";
+import { debug } from "../utils/debug-log";
+import { isDebug } from "../main";
 
 export async function initializeSettings(rl: readline.Interface) {
   fs.mkdirSync(settingsDir, { recursive: true });
 
-  let settings: Settings = {};
+  let settings: Settings = {
+    service: "openai",
+    model: "gpt-4",
+  };
 
   settings.service = (await askQuestion(rl, "Select the API service to use: ", [
     ...services,
   ])) as Settings["service"];
 
-  if (settings.service === "custom" || settings.service === "cloudflare") {
+  if (settings.service === "custom") {
     settings.endpoint = await askQuestion(rl, "Enter the API endpoint: ");
   }
-
   if (settings.service === "openai") {
     settings.openai = {
-      key: await askQuestion(rl, "Enter the OpenAI API key: "),
+      key: await askQuestion(rl, "Enter your OpenAI API key: "),
     };
   }
-
-  if (settings.service === "cloudflare") {
-    settings.cloudflare = {
-      client_id: await askQuestion(
-        rl,
-        "Enter the Cloudflare service token client id: "
-      ),
-      client_secret: await askQuestion(
-        rl,
-        "Enter the Cloudflare service token client secret: "
-      ),
-    };
-  }
-
   if (settings.service === "custom") {
     console.log(
       "Enter custom headers. Type 'done' as the header key when finished."
     );
     settings.headers = await askForCustomHeaders(rl);
   }
-
-  settings.model = await askQuestion(
+  const modelAnswer = await askQuestion(
     rl,
-    "Enter your model (leave blank for default: gpt-3.5-turbo): "
+    "Enter your model (leave blank for default: gpt-4): "
   );
+  if (modelAnswer) {
+    settings.model = modelAnswer;
+  }
 
-  console.log(chalk.green(`Saving settings: ${settingsFilePath}`));
-  console.log({ settings });
+  debug.info(
+    `Saving settings at ${settingsFilePath}:\n${JSON.stringify(
+      settings,
+      null,
+      2
+    )}}`
+  );
 
   saveSettings(settings);
   rl.close();

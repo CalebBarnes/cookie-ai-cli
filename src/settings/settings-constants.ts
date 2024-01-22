@@ -10,6 +10,7 @@ const kernelVersion = os.version();
 export const settingsDir = `${homeDir}/.cookie-ai`;
 export const settingsFileName = `settings.json`;
 export const settingsFilePath = `${settingsDir}/${settingsFileName}`;
+export const services = ["openai", "custom"] as const;
 const dirName = import.meta.dir;
 
 let schemaPath = dirName?.includes("src")
