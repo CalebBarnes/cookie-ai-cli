@@ -34,15 +34,26 @@ export async function handleCommand({
     const answer = await askQuestion(rl, `Run this command? (y/n) `);
     if (answer === "y") {
       console.log(chalk.green("Executing command: "), chalk.blue(fullCommand));
-      const [bin, ...args] = fullCommand.split(` `)
+      const [bin, ...args] = fullCommand.split(` `);
       const proc = spawn(bin, args, {
-        stdio: `inherit`,
+        stdio: ["inherit", "inherit", "pipe"], // Pipe only stderr
+      });
+
+      let stderrOutput = "";
+      proc.stderr.on("data", (data) => {
+        stderrOutput += data;
       });
 
       // Listen to the close event
-      proc.on("close", (code) => {
+      proc.on("close", async (code) => {
         if (code !== 0) {
           console.log(chalk.red("Command exited with error code: ", code));
+          console.log(chalk.red(stderrOutput));
+          await sendChat({
+            isError: true,
+            message: `Command exited with error code: ${code}\n${stderrOutput}`,
+            rl,
+          });
         }
 
         resolve(code);
