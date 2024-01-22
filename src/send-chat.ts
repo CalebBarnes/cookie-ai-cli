@@ -108,7 +108,11 @@ export async function sendChat({
 
   try {
     pamperedResponseData = JSON.parse(json) as Response;
-    payload.messages.push(responseJson?.choices?.[0]?.message);
+    const aiMessage = responseJson?.choices?.[0]?.message;
+    if (!aiMessage) {
+      await handleEmptyResponse({ rl });
+    }
+    payload.messages.push(aiMessage);
     await handleAction({ result: pamperedResponseData, rl });
   } catch (error) {
     console.log(chalk.red("Result is not valid JSON, failed to parse"));
@@ -124,4 +128,20 @@ export async function sendChat({
   }
 
   return pamperedResponseData;
+}
+
+async function handleEmptyResponse({ rl }) {
+  const settings = await getSettings({ rl });
+  console.log(chalk.red("No message in the response from the AI."));
+  console.log(
+    chalk.red("Make sure you're using the correct API key and model.")
+  );
+  if (settings.service === "openai") {
+    console.log(
+      chalk.red(
+        "Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits \nand that you have enough credits to use the API."
+      )
+    );
+  }
+  process.exit(1);
 }
