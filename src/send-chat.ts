@@ -6,14 +6,11 @@ import {
   settingsFilePath,
   systemInstructions,
 } from "./settings/settings-constants";
-import { getEndpoint, getHeaders } from "./settings/get-headers";
+import { getHeaders } from "./settings/get-headers";
 import { isDebug } from "./main";
+import { debug } from "./utils/debug-log";
 
-let payload = {
-  model: "gpt-4",
-  messages: [{ role: "system", content: systemInstructions }],
-  temperature: 0.7,
-} as {
+type Payload = {
   /**
    * ID of the model to use for chat completion.
    * See the model endpoint compatibility table for details on which models work with the Chat API.
@@ -42,6 +39,12 @@ let payload = {
   instruction_template?: string;
 };
 
+let payload = {
+  model: "gpt-4",
+  messages: [{ role: "system", content: systemInstructions }],
+  temperature: 0.7,
+} as Payload;
+
 export async function sendChat({
   message,
   rl,
@@ -67,11 +70,27 @@ export async function sendChat({
   });
 
   console.log(chalk.yellow("🤔 AI thinking..."));
-  const response = await fetch(getEndpoint(settings), {
+
+  const endpoint =
+    settings.service === "openai"
+      ? "https://api.openai.com/v1/chat/completions"
+      : settings.endpoint;
+
+  if (!endpoint) {
+    debug.error(`Failed to resolve endpoint from settings: ${settings}`);
+    process.exit(1);
+  }
+
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: getHeaders(settings),
     body: JSON.stringify(payload),
   });
+  if (!response.ok) {
+    debug.error(`Failed to send message to endpoint: ${endpoint}`);
+    process.exit(1);
+  }
+
   console.log(chalk.green("✅ AI responded!"));
 
   let responseJson;
