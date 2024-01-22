@@ -60,7 +60,7 @@ For OpenAI's Chat GPT-4 API:
   "openai": {
     "key": "<your-open-ai-api-key>"
   },
-  "model": "gpt-4" // defaults to gpt-4
+  "model": "gpt-4"
 }
 ```
 
@@ -72,7 +72,7 @@ For a custom, OpenAI-compatible API on your local network:
 {
   "service": "custom",
   "endpoint": "http://192.168.8.162:5000/v1/chat/completions",
-  "model": "gpt-4" // defaults to gpt-4
+  "model": "gpt-4"
 }
 ```
 
@@ -88,7 +88,7 @@ To include custom headers in requests:
     "Authorization": "Bearer <your-token>",
     "Some-Other-Header": "Some-Other-Value"
   },
-  "model": "gpt-4" // defaults to gpt-4
+  "model": "gpt-4"
 }
 ```
 
