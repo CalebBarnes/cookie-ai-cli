@@ -12,6 +12,9 @@ const openaiSchema = z.object({
     required_error: errors.OPENAI_KEY_REQUIRED,
   }),
 });
+const customSchema = z.object({
+  payload: z.record(z.string()).optional(),
+});
 
 export const settingsSchema = z
   .object({
@@ -21,6 +24,7 @@ export const settingsSchema = z
       required_error: "'model' is required. (example: 'gpt-4')",
     }),
     openai: openaiSchema.optional(),
+    custom: customSchema.optional(),
     headers: z.record(z.string()).optional(),
   })
   .refine((data) => data.service !== "openai" || data.openai, {

@@ -2,10 +2,7 @@ import { type Response } from "./ai-response-schema";
 import chalk from "chalk";
 import { getSettings } from "./settings/get-settings";
 import { handleAction } from "./handle-action";
-import {
-  settingsFilePath,
-  systemInstructions,
-} from "./settings/settings-constants";
+import { systemInstructions } from "./settings/settings-constants";
 import { getHeaders } from "./settings/get-headers";
 import { isDebug } from "./main";
 import { debug } from "./utils/debug-log";
@@ -56,8 +53,9 @@ export async function sendChat({
 }): Promise<Response> {
   const settings = await getSettings({ rl });
 
-  if (settings.service !== "openai") {
-    payload.instruction_template = "Alpaca";
+  if (settings.service === "custom" && settings.custom?.payload) {
+    // Allow passing in custom payload for service "custom"
+    Object.assign(payload, settings.custom?.payload);
   }
 
   if (settings.model) {
@@ -96,30 +94,27 @@ export async function sendChat({
   let responseJson;
   try {
     responseJson = await response.json();
-
     if (isDebug) {
       console.log("responseJson", responseJson);
     }
-
-    payload.messages.push(responseJson?.choices?.[0]?.message);
-    if (isDebug) {
-      console.log("payload", payload);
-    }
   } catch (err) {
-    console.log(chalk.red("Failed to parse endpoint response as JSON"));
-    console.log(
-      chalk.red(
-        `Check your settings at ${settingsFilePath}, or run \`ai --init\` to reinitialize your settings file.`
-      )
-    );
+    debug.error("Failed to parse endpoint response as JSON");
     console.error(err);
     process.exit(1);
   }
 
+  const aiResponseChatMessage = responseJson?.choices?.[0]?.message;
+  if (!aiResponseChatMessage) {
+    await handleEmptyResponse({ rl });
+  }
+  // add the AI response to the chat history
+  payload.messages.push(aiResponseChatMessage);
+  if (isDebug) {
+    console.log("payload", payload);
+  }
+
   const aiResponseContent = responseJson?.choices?.[0]?.message?.content;
-
   let pamperedResponseData;
-
   const json = aiResponseContent?.slice(
     aiResponseContent.indexOf("{"),
     aiResponseContent.lastIndexOf("}") + 1
@@ -127,21 +122,17 @@ export async function sendChat({
 
   try {
     pamperedResponseData = JSON.parse(json) as Response;
-    const aiMessage = responseJson?.choices?.[0]?.message;
-    if (!aiMessage) {
-      await handleEmptyResponse({ rl });
-    }
-    payload.messages.push(aiMessage);
     await handleAction({ result: pamperedResponseData, rl });
   } catch (error) {
-    console.log(chalk.red("Result is not valid JSON, failed to parse"));
-    console.log("AI Response: ");
-    console.log(aiResponseContent);
-
-    console.log("Asking AI to retry...");
-    sendChat({
+    debug.error("Failed to parse AI response as JSON");
+    debug.log("Asking AI to retry...");
+    if (isDebug) {
+      console.log("AI Response: ");
+      console.log(aiResponseContent);
+    }
+    await sendChat({
       isError: true,
-      message: "Your response was not valid JSON. Please try again.",
+      message: "Your last response was not valid JSON. Please try again.",
       rl,
     });
   }
@@ -151,15 +142,14 @@ export async function sendChat({
 
 async function handleEmptyResponse({ rl }) {
   const settings = await getSettings({ rl });
-  console.log(chalk.red("No message in the response from the AI."));
-  console.log(
-    chalk.red("Make sure you're using the correct API key and model.")
-  );
   if (settings.service === "openai") {
-    console.log(
-      chalk.red(
-        "Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits \nand that you have enough credits to use the API."
-      )
+    debug.error(
+      `No message in response from the AI.
+Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits 
+and that you have enough credits to use the API.
+
+Make sure you're also using the correct API key and model.
+`
     );
   }
   process.exit(1);
