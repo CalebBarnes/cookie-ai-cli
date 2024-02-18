@@ -1,8 +1,8 @@
-import chalk from "chalk";
 import { spawn } from "node:child_process";
 import { askQuestion } from "./ask-question";
 import { sendChat } from "./send-chat";
 import readline from "readline";
+import { colors } from "./utils/colors";
 
 export async function handleCommand({
   rl,
@@ -23,32 +23,38 @@ export async function handleCommand({
         return values[keyWithBraces] || `{${match}}`; // Replace with value or keep the placeholder if value is not found
       });
     }
-
-    console.log(`${chalk.underline("command")}: ${chalk.red(fullCommand)}`);
+    console.log(`command: ${colors.red}${fullCommand}${colors.reset}`);
     if (description) {
-      console.log(
-        `${chalk.underline("description")}: ${chalk.yellow(description)}`
-      );
+      console.log(`description: ${colors.yellow}${description}${colors.reset}`);
     }
 
     const answer = await askQuestion(rl, `Run this command? (y/n) `);
+
     if (answer === "y") {
-      console.log(chalk.green("Executing command: "), chalk.blue(fullCommand));
-      const [bin, ...args] = fullCommand.split(` `);
+      console.log(
+        "Executing command: ",
+        `${colors.blue}${fullCommand}${colors.reset}`
+      );
+
+      const [bin, ...args] = fullCommand.split(" ");
       const proc = spawn(bin, args, {
-        stdio: ["inherit", "inherit", "pipe"], // Pipe only stderr
+        stdio: ["inherit", "inherit", "pipe"],
+        shell: true,
+        cwd: process.cwd(),
       });
 
       let stderrOutput = "";
       proc.stderr.on("data", (data) => {
-        stderrOutput += data;
+        console.log(data.toString());
+        stderrOutput += data.toString();
       });
 
       // Listen to the close event
       proc.on("close", async (code) => {
         if (code !== 0) {
-          console.log(chalk.red("Command exited with error code: ", code));
-          console.log(chalk.red(stderrOutput));
+          console.log(
+            `${colors.red}Command exited with error code: ${code}${colors.reset}`
+          );
           await sendChat({
             isError: true,
             message: `Command exited with error code: ${code}\n${stderrOutput}`,
@@ -57,6 +63,13 @@ export async function handleCommand({
         }
 
         resolve(code);
+      });
+
+      process.on("SIGINT", () => {
+        // Kill the spawned child processes and parent process if the user presses Ctrl+C
+        proc.kill("SIGINT");
+        reject();
+        process.exit(0);
       });
     } else {
       console.log("Command aborted.");

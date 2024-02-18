@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import readline from "readline";
+import { colors } from "./utils/colors";
 
 export function askQuestion(
   rl: readline.Interface,
@@ -7,7 +7,7 @@ export function askQuestion(
   options: string[] = []
 ): Promise<string> {
   return new Promise((resolve) => {
-    let fullQuery = chalk.cyan(query);
+    let fullQuery = `${colors.cyan}${query}${colors.reset}`;
 
     // Check if options are provided
     if (options.length > 0) {
@@ -29,7 +29,9 @@ export function askQuestion(
         if (!isNaN(choice) && choice >= 1 && choice <= options.length) {
           resolve(options[choice - 1]);
         } else {
-          console.log(chalk.red("Invalid choice, please try again."));
+          console.log(
+            `${colors.red}Invalid choice, please try again.${colors.reset}`
+          );
           resolve(askQuestion(rl, query, options)); // Recursively ask again
         }
       } else {

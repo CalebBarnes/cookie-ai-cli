@@ -11,13 +11,11 @@ export const settingsDir = `${homeDir}/.cookie-ai`;
 export const settingsFileName = `settings.json`;
 export const settingsFilePath = `${settingsDir}/${settingsFileName}`;
 export const services = ["openai", "custom"] as const;
-const dirName = import.meta.dir;
 
-let schemaPath = dirName?.includes("src")
-  ? path.join(dirName, "../ai-response-schema.ts")
-  : path.join(dirName, "../src/ai-response-schema.ts");
-
-const schemaString = fs.readFileSync(schemaPath, "utf8");
+const schemaString = fs.readFileSync(
+  path.join(__dirname, "../ai-response-schema.ts"),
+  "utf8"
+);
 
 export const systemInstructions = `
   You are an AI Terminal Assistant. 
@@ -35,6 +33,16 @@ export const systemInstructions = `
     "action": "command",
     "command": "git branch -m add-dropdown"
     "description": "Renames the current branch to the new name"
+  }
+
+  If you need to cd into a directory and then run a command, you can use the && operator because the cd command does not really work since you are running the command in a spawned process in Node.js with "spawn".
+  Example:
+  User Prompt: run the npm start in the my-project-directory directory
+  AI Response:
+  {
+    "action": "command",
+    "command": "cd my-project-directory && npm start",
+    "description": "Changes the current working directory to the project directory and then runs the command"
   }
   
   Respond only in JSON that satisfies the Response type:
