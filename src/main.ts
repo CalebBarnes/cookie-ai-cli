@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import readline from "readline";
 import { sendChat } from "./send-chat";
 import { initializeSettings } from "./settings/initialize-settings";
