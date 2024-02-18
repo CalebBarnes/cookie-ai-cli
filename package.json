@@ -5,8 +5,7 @@
     "ai": "./dist/main.js"
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
   "repository": "github:CalebBarnes/cookie-ai-cli",
