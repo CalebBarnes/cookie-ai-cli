@@ -4,6 +4,10 @@
   "bin": {
     "ai": "./dist/main.js"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
   "repository": "github:CalebBarnes/cookie-ai-cli",
   "author": "Caleb Barnes <https://github.com/CalebBarnes>",
