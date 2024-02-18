@@ -61,7 +61,7 @@ export async function handleCommand({
             rl,
           });
         }
-
+        console.log(``);
         resolve(code);
       });
 

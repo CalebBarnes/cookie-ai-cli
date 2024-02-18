@@ -1,6 +1,6 @@
 {
   "name": "cookie-ai-cli",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "bin": {
     "ai": "./dist/main.js"
   },
@@ -15,7 +15,7 @@
     "copy-ts-file": "cp src/ai-response-schema.ts dist/",
     "build": "tsc && npm run copy-ts-file",
     "build:watch": "tsc -w & npm run copy-ts-file",
-    "start": "node ./dist/main.js",
+    "start": "node ./dist/main.js what is my ip",
     "dev:init": "nodemon dist/main.js --init",
     "dev": "nodemon dist/main.js",
     "dev:watch": "concurrently \"npm:build:watch\" \"npm:dev\"",

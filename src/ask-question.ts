@@ -8,17 +8,13 @@ export function askQuestion(
 ): Promise<string> {
   return new Promise((resolve) => {
     let fullQuery = `${colors.cyan}${query}${colors.reset}`;
-
-    // Check if options are provided
     if (options.length > 0) {
-      // Display the options
       fullQuery += "\n";
       options.forEach((option, index) => {
         fullQuery += `${index + 1}. ${option}\n`;
       });
       fullQuery += `Enter your choice (1-${options.length}): `;
     } else {
-      // For a simple query, just add a space after the query
       fullQuery += " ";
     }
 
