@@ -1,11 +1,11 @@
 import { type Response } from "./ai-response-schema";
-import chalk from "chalk";
 import { getSettings } from "./settings/get-settings";
 import { handleAction } from "./handle-action";
 import { systemInstructions } from "./settings/settings-constants";
 import { getHeaders } from "./settings/get-headers";
 import { isDebug } from "./main";
 import { debug } from "./utils/debug-log";
+import { colors } from "./utils/colors";
 
 type Payload = {
   /**
@@ -67,7 +67,7 @@ export async function sendChat({
     content: !isError ? message : `error with last command: ${message}`,
   });
 
-  console.log(chalk.yellow("🤔 AI thinking..."));
+  console.log(`${colors.yellow}🤔 AI thinking...${colors.reset}`);
 
   const endpoint =
     settings.service === "openai"
@@ -89,7 +89,7 @@ export async function sendChat({
     process.exit(1);
   }
 
-  console.log(chalk.green("✅ AI responded!"));
+  console.log(`${colors.green}✅ AI responded!${colors.reset}`);
 
   let responseJson;
   try {

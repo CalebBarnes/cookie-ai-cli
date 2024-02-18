@@ -1,8 +1,8 @@
-import chalk from "chalk";
 import { askQuestion } from "./ask-question";
 import { handleCommand } from "./handle-command";
 import { sendChat } from "./send-chat";
 import { promptUser } from "./prompt-user";
+import { colors } from "./utils/colors";
 
 export async function handleAction({ result, rl }) {
   if (result.action === "command") {
@@ -46,7 +46,7 @@ export async function handleAction({ result, rl }) {
     }
   } else {
     console.log(
-      chalk.red("AI tried to use an unsupported action, telling AI to retry: "),
+      `${colors.red}AI tried to use an unsupported action, telling AI to retry: ${colors.reset}`,
       result.action
     );
     await sendChat({

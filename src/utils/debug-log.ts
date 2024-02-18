@@ -1,3 +1,5 @@
+import { colors } from "./colors";
+
 function debugLog(
   message: string | Record<string, unknown>,
   level: "error" | "log" | "warn" | "info" = "log",
@@ -9,13 +11,13 @@ function debugLog(
   const messagePrefix = (() => {
     switch (level) {
       case "error":
-        return "\x1b[31m"; // Red
+        return colors.red;
       case "warn":
-        return "\x1b[33m"; // Yellow
+        return colors.yellow;
       case "info":
-        return "\x1b[36m"; // Cyan
+        return colors.cyan;
       default:
-        return ""; // No color
+        return "";
     }
   })();
 
@@ -24,11 +26,9 @@ function debugLog(
   const levelPrefix = (() => {
     switch (level) {
       case "error":
-        return "\x1b[31m"; // Red
+        return colors.red;
       case "warn":
-        return "\x1b[33m"; // Yellow
-      // case "info":
-      //   return "";
+        return colors.yellow;
       default:
         return "";
     }

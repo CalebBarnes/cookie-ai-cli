@@ -4,10 +4,14 @@
     "outDir": "dist",
     "strict": true,
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "CommonJS",
+    "resolveJsonModule": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "noImplicitAny": false
-  }
+    "noImplicitAny": false,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
