@@ -1,13 +1,13 @@
 {
   "name": "cookie-ai-cli",
-  "version": "1.4.3",
+  "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
+  "version": "1.4.4",
   "bin": {
     "ai": "./dist/main.js"
   },
   "files": [
     "dist"
   ],
-  "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
   "repository": "github:CalebBarnes/cookie-ai-cli",
   "author": "Caleb Barnes <https://github.com/CalebBarnes>",
   "license": "MIT",
@@ -21,15 +21,21 @@
     "dev:watch": "concurrently \"npm:build:watch\" \"npm:dev\"",
     "dev:error": "nodemon dist/main.js run a simple command that will throw an error in stderr",
     "dev:debug": "nodemon dist/main.js rename my git branch --debug",
-    "dev:version": "nodemon dist/main.js --version"
+    "dev:version": "nodemon dist/main.js --version",
+    "test": "jest"
   },
   "dependencies": {
+    "commander": "^12.0.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.10.0",
     "concurrently": "^8.2.2",
+    "jest": "^29.7.0",
+    "mock-stdin": "^1.0.0",
     "nodemon": "^3.0.3",
+    "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.2"
   },

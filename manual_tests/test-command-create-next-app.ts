@@ -1,4 +1,4 @@
-import { handleCommand } from "../handle-command";
+import { handleCommand } from "../src/handle-command";
 import readline from "readline";
 
 // this is a test function to test the handleCommand function using the npx create-next-app command

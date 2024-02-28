@@ -2,12 +2,11 @@ import fs from "fs";
 import { saveSettings } from "./save-settings";
 import { services, settingsDir, settingsFilePath } from "./settings-constants";
 import { askQuestion } from "../ask-question";
-import readline from "readline";
+import { Interface } from "readline";
 import { Settings } from "./settings-schema";
 import { debug } from "../utils/debug-log";
-import { isDebug } from "../main";
 
-export async function initializeSettings(rl: readline.Interface) {
+export async function initializeSettings(rl: Interface) {
   fs.mkdirSync(settingsDir, { recursive: true });
 
   let settings: Settings = {

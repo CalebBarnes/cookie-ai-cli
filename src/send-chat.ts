@@ -3,9 +3,10 @@ import { getSettings } from "./settings/get-settings";
 import { handleAction } from "./handle-action";
 import { systemInstructions } from "./settings/settings-constants";
 import { getHeaders } from "./settings/get-headers";
-import { isDebug } from "./main";
+import { options } from "./main";
 import { debug } from "./utils/debug-log";
 import { colors } from "./utils/colors";
+import { Interface } from "readline";
 
 type Payload = {
   /**
@@ -48,7 +49,7 @@ export async function sendChat({
   isError,
 }: {
   message: string;
-  rl: any;
+  rl: Interface;
   isError?: boolean;
 }): Promise<Response> {
   const settings = await getSettings({ rl });
@@ -94,7 +95,7 @@ export async function sendChat({
   let responseJson;
   try {
     responseJson = await response.json();
-    if (isDebug) {
+    if (options.debug) {
       console.log("responseJson", responseJson);
     }
   } catch (err) {
@@ -109,7 +110,7 @@ export async function sendChat({
   }
   // add the AI response to the chat history
   payload.messages.push(aiResponseChatMessage);
-  if (isDebug) {
+  if (options.debug) {
     console.log("payload", payload);
   }
 
@@ -126,7 +127,7 @@ export async function sendChat({
   } catch (error) {
     debug.error("Failed to parse AI response as JSON");
     debug.log("Asking AI to retry...");
-    if (isDebug) {
+    if (options.debug) {
       console.log("AI Response: ");
       console.log(aiResponseContent);
     }

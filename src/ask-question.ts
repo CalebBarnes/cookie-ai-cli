@@ -1,8 +1,8 @@
-import readline from "readline";
+import { Interface } from "readline";
 import { colors } from "./utils/colors";
 
 export function askQuestion(
-  rl: readline.Interface,
+  rl: Interface,
   query: string,
   options: string[] = []
 ): Promise<string> {

@@ -3,8 +3,16 @@ import { handleCommand } from "./handle-command";
 import { sendChat } from "./send-chat";
 import { promptUser } from "./prompt-user";
 import { colors } from "./utils/colors";
+import { Interface } from "readline";
+import { Response } from "./ai-response-schema";
 
-export async function handleAction({ result, rl }) {
+export async function handleAction({
+  result,
+  rl,
+}: {
+  result: Response;
+  rl: Interface;
+}) {
   if (result.action === "command") {
     await handleCommand({
       rl,
@@ -47,12 +55,14 @@ export async function handleAction({ result, rl }) {
   } else {
     console.log(
       `${colors.red}AI tried to use an unsupported action, telling AI to retry: ${colors.reset}`,
+      // @ts-ignore -- handle unsupported action
       result.action
     );
     await sendChat({
+      // @ts-ignore -- handle unsupported action
       message: `${result.action} is not a supported action. Make sure you respond only with JSON that satisfies the Response type.`,
       rl,
     });
   }
-  promptUser({ rl });
+  promptUser(rl);
 }

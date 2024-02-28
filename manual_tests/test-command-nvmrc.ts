@@ -1,4 +1,4 @@
-import { handleCommand } from "../handle-command";
+import { handleCommand } from "../src/handle-command";
 import readline from "readline";
 
 async function testCommand() {
@@ -9,7 +9,7 @@ async function testCommand() {
 
   await handleCommand({
     rl,
-    command: "asdfasdfasdf 123123",
+    command: "node -v > .nvmrc",
   });
   process.exit(0);
 }

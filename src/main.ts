@@ -1,36 +1,16 @@
 #!/usr/bin/env node
-import readline from "readline";
-import { sendChat } from "./send-chat";
-import { initializeSettings } from "./settings/initialize-settings";
-import { promptUser } from "./prompt-user";
+import { Command } from "commander";
 import packageJson from "../package.json";
+import { registerInitCommand } from "./commands/init";
+import { registerPromptCommand } from "./commands/prompt";
 
-export const isDebug = process.argv.includes("--debug");
+export const program = new Command();
+program.version(packageJson.version);
+program.option("-d, --debug", "output extra debugging");
 
-async function main() {
-  if (process.argv.includes("--version")) {
-    console.log(packageJson.version);
-    process.exit(0);
-  }
+registerInitCommand(program);
+registerPromptCommand(program);
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+program.parse(process.argv);
 
-  let userPrompt: string | undefined = process.argv.slice(2).join(" ");
-  if (userPrompt?.includes("--debug")) {
-    userPrompt = userPrompt.replace("--debug", "");
-  }
-
-  if (userPrompt.includes("--init")) {
-    await initializeSettings(rl);
-  }
-
-  if (!userPrompt) {
-    await promptUser({ rl });
-  } else {
-    await sendChat({ message: userPrompt, rl });
-  }
-}
-main();
+export const options = program.opts();

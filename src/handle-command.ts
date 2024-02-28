@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { askQuestion } from "./ask-question";
 import { sendChat } from "./send-chat";
-import readline from "readline";
+import { Interface } from "readline";
 import { colors } from "./utils/colors";
 
 export async function handleCommand({
@@ -10,7 +10,7 @@ export async function handleCommand({
   values,
   description,
 }: {
-  rl: readline.Interface;
+  rl: Interface;
   command: string;
   values?: Record<string, string>;
   description?: string;

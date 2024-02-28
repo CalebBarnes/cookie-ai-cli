@@ -38,7 +38,7 @@ export const settingsSchema = z
 
 export type Settings = z.infer<typeof settingsSchema>;
 
-export function validateSettings(settings) {
+export function validateSettings(settings: Settings) {
   const result = settingsSchema.safeParse(settings);
   if (!result.success) {
     for (const error of result.error.issues) {
