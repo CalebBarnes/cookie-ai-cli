@@ -5,9 +5,11 @@ import readline from "readline";
 
 export function registerPromptCommand(program: Command) {
   program
-    .arguments("[message]")
+    .arguments("[message...]")
     .description("Send a message or prompt user")
-    .action(async (message) => {
+    .action(async (argv: string[]) => {
+      const message = argv.join(" ");
+
       const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
