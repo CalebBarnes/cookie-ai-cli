@@ -17,7 +17,7 @@
     "build:watch": "tsc -w & npm run copy-ts-file",
     "start": "node ./dist/main.js what is my ip",
     "dev:init": "nodemon dist/main.js --init",
-    "dev": "nodemon dist/main.js",
+    "dev": "nodemon dist/main.js --debug",
     "dev:watch": "concurrently \"npm:build:watch\" \"npm:dev\"",
     "dev:error": "nodemon dist/main.js run a simple command that will throw an error in stderr",
     "dev:debug": "nodemon dist/main.js rename my git branch --debug",
@@ -30,14 +30,14 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.10.0",
+    "@types/node": "^20.11.24",
     "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "mock-stdin": "^1.0.0",
-    "nodemon": "^3.0.3",
+    "nodemon": "^3.1.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.3"
   },
   "keywords": [
     "ai",
