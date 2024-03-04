@@ -19,7 +19,7 @@ export async function handleAction({ result }: { result: Response }) {
       });
     }
   } else if (result.action === "user_info_required") {
-    const values = {};
+    const values = {} as Record<string, string>;
     for (const item of result.values) {
       const answer = await askQuestion(item.label);
       values[item.value] = answer;

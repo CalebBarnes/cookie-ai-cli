@@ -46,7 +46,7 @@ async function askForCustomHeaders() {
   console.log(
     "Enter custom headers. Type 'done' as the header key when finished."
   );
-  const headers = {};
+  const headers = {} as Record<string, string>;
   let addingHeaders = true;
 
   while (addingHeaders) {

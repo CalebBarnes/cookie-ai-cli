@@ -49,7 +49,7 @@ export async function sendChat({
 }: {
   message: string;
   isError?: boolean;
-}): Promise<Response> {
+}): Promise<Response | undefined> {
   payload.messages[0].content = await getSystemInstructions();
 
   const settings = getSettings();

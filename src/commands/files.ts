@@ -136,8 +136,7 @@ export function registerFilesCommands(program: Command) {
           break;
 
         case "copy":
-          const text = getFilesMessage();
-
+          const text = await getFilesMessage();
           writeToClipboard(text);
           console.log(
             `${colors.green}files copied to clipboard:${colors.reset}`
