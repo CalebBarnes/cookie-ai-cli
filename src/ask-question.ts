@@ -1,11 +1,9 @@
-import { Interface } from "readline";
-import { colors } from "./utils/colors";
 import readline from "readline";
+import { colors } from "./utils/colors.js";
 
 export function askQuestion(
   query: string,
   options?: string[]
-  // rl?: Interface
 ): Promise<string> {
   return new Promise((resolve) => {
     let fullQuery = `${colors.cyan}${query}${colors.reset}`;

@@ -1,19 +1,40 @@
 import fs from "fs";
 import { Command } from "commander";
-import { getSettings } from "../settings/get-settings";
-import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants";
-import { debug } from "../utils/debug-log";
-import { saveSettings } from "../settings/save-settings";
-import { colors } from "../utils/colors";
-import { writeToClipboard } from "../utils/write-to-clipboard";
+import { getSettings } from "../settings/get-settings.js";
+import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
+import { debug } from "../utils/debug-log.js";
+import { saveSettings } from "../settings/save-settings.js";
+import { colors } from "../utils/colors.js";
+import { writeToClipboard } from "../utils/write-to-clipboard.js";
+import { askQuestion } from "../ask-question.js";
 
-export function getFilesMessage(settingsFilePath = DEFAULT_SETTINGS_FILE_PATH) {
+export async function getFilesMessage(
+  settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
+) {
   const settings = getSettings(settingsFilePath);
 
   let contents = ``;
   if (settings.files?.length) {
     for (const file of settings.files) {
-      const fileContents = fs.readFileSync(file, "utf-8");
+      let fileContents;
+
+      try {
+        fileContents = fs.readFileSync(file, "utf-8");
+      } catch (err: any) {
+        if (err.message.includes("no such file or directory")) {
+          debug.error(`File not found: ${file}`);
+        } else {
+          debug.error(`Error reading file: ${file}`);
+        }
+        const answer = await askQuestion(
+          "Remove this file from the list? (y/n)"
+        );
+        if (answer === "y") {
+          removeItem([file]);
+        }
+        continue;
+      }
+
       contents += `${file}:
 ${fileContents}
 

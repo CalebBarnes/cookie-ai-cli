@@ -1,4 +1,4 @@
-import { Settings } from "./settings-schema";
+import { Settings } from "./settings-schema.js";
 
 export function getHeaders(settings: Settings) {
   const headers = {

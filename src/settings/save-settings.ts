@@ -1,8 +1,8 @@
 import fs from "fs";
-import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants";
-import { Settings, validateSettings } from "./settings-schema";
-import { debug } from "../utils/debug-log";
 import path from "path";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
+import { Settings, validateSettings } from "./settings-schema.js";
+import { debug } from "../utils/debug-log.js";
 
 export function saveSettings(
   settings: Settings,

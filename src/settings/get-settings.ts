@@ -1,10 +1,10 @@
-import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
 import fs from "fs";
-import { Settings, validateSettings } from "./settings-schema";
-import { debug } from "../utils/debug-log";
-import { options } from "..";
+import { Settings, validateSettings } from "./settings-schema.js";
+import { debug } from "../utils/debug-log.js";
+import { options } from "../arg-options.js";
 
-export function getSettings(filePath = DEFAULT_SETTINGS_FILE_PATH): Settings {
+export function getSettings(filePath = DEFAULT_SETTINGS_FILE_PATH) {
   let settings: Settings | undefined;
   let file: string | undefined;
 

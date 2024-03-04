@@ -13,19 +13,13 @@
   "author": "Caleb Barnes <https://github.com/CalebBarnes>",
   "license": "MIT",
   "scripts": {
-    "copy-ts-file": "cp src/ai-response-schema.ts dist/",
-    "build:vite": "vite build && npm run copy-ts-file",
-    "build": "tsc && npm run copy-ts-file",
+    "build": "tsc",
+    "postbuild": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w & npm run copy-ts-file",
     "start": "node ./dist/index.js",
-    "start:ip": "node ./dist/index.js what is my ip",
-    "dev:init": "nodemon dist/index.js --init",
-    "dev": "nodemon dist/index.js --debug",
-    "dev:watch": "concurrently \"npm:build:watch\" \"npm:dev\"",
-    "dev:error": "nodemon dist/index.js run a simple command that will throw an error in stderr",
-    "dev:debug": "nodemon dist/index.js rename my git branch --debug",
-    "dev:version": "nodemon dist/index.js --version",
-    "test": "vitest"
+    "start:ip": "node ./dist/index.js what is my ip --debug",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "commander": "^12.0.0",

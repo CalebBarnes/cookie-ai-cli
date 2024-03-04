@@ -1,9 +1,9 @@
-import { askQuestion } from "./ask-question";
-import { handleCommand } from "./handle-command";
-import { sendChat } from "./send-chat";
-import { promptUser } from "./prompt-user";
-import { colors } from "./utils/colors";
-import { Response } from "./ai-response-schema";
+import { askQuestion } from "./ask-question.js";
+import { handleCommand } from "./handle-command.js";
+import { sendChat } from "./send-chat.js";
+import { promptUser } from "./prompt-user.js";
+import { colors } from "./utils/colors.js";
+import { Response } from "./ai-response-schema.js";
 
 export async function handleAction({ result }: { result: Response }) {
   if (result.action === "command") {

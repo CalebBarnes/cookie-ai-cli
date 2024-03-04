@@ -1,6 +1,6 @@
 import { Command } from "commander";
-import { promptUser } from "../prompt-user";
-import { sendChat } from "../send-chat";
+import { promptUser } from "../prompt-user.js";
+import { sendChat } from "../send-chat.js";
 
 export function registerPromptCommand(program: Command) {
   program

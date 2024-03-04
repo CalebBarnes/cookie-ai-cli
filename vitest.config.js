@@ -1,22 +1,27 @@
 import { defineConfig } from "vitest/config";
-// import path from "path";
 
 export default defineConfig({
-  // resolve: {
-  //   // Replicate the alias configuration from Vite
-  //   alias: {
-  //     "@": path.resolve(__dirname, "src"),
-  //   },
-  // },
   test: {
-    // Since your target environment is Node.js
     environment: "node",
+    include: ["__tests__/**/*.test.ts"],
+    // deps:{
 
-    // globals: true,
-    // transformMode: {
-    //   web: [/.[tj]sx?$/], // Transform .ts, .tsx, .js, .jsx files under Vite
     // },
+    // sourcemap: true,
 
-    sourcemap: true,
+    // Configure Vitest to use ts-node for TypeScript support
+    // This allows you to write your tests in TypeScript directly
+    esbuild: {
+      loader: "ts",
+      // Include any necessary TypeScript options here
+      // This can be particularly useful for specifying compiler options that are relevant for tests
+      // tsconfigRaw: {
+      //   compilerOptions: {
+      //     // Set to match your project's needs; for example, to support top-level await, etc.
+      //     target: "ESNext",
+      //     module: "ESNext",
+      //   },
+      // },
+    },
   },
 });

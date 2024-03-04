@@ -1,13 +1,13 @@
-import { getFilesMessage } from "../commands/files";
-import { getSettings } from "./get-settings";
+import { getFilesMessage } from "../commands/files.js";
+import { getSettings } from "./get-settings.js";
 import {
   DEFAULT_SETTINGS_FILE_PATH,
   baseInstructions,
-} from "./settings-constants";
+} from "./settings-constants.js";
 
-export const getSystemInstructions = (
+export async function getSystemInstructions(
   filePath = DEFAULT_SETTINGS_FILE_PATH
-) => {
+) {
   let instructions = baseInstructions;
 
   const settings = getSettings(filePath);
@@ -17,7 +17,7 @@ export const getSystemInstructions = (
     Array.isArray(settings.files) &&
     settings.files.length
   ) {
-    const filesMessageContent = getFilesMessage();
+    const filesMessageContent = await getFilesMessage();
     instructions += `Current User watched files: ${settings.files.join(", ")}
   
   ${filesMessageContent}
@@ -28,6 +28,4 @@ export const getSystemInstructions = (
   }
 
   return instructions;
-};
-
-export const systemInstructions = getSystemInstructions();
+}

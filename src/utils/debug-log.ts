@@ -1,4 +1,4 @@
-import { colors } from "./colors";
+import { colors } from "./colors.js";
 
 function debugLog(
   message: string | Record<string, unknown>,

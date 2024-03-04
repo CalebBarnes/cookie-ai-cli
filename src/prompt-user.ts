@@ -1,5 +1,5 @@
-import { askQuestion } from "./ask-question";
-import { sendChat } from "./send-chat";
+import { askQuestion } from "./ask-question.js";
+import { sendChat } from "./send-chat.js";
 
 export async function promptUser() {
   let answer = await askQuestion("Enter your command: ");

@@ -1,11 +1,12 @@
-import { type Response } from "./ai-response-schema";
-import { getSettings } from "./settings/get-settings";
-import { handleAction } from "./handle-action";
-import { systemInstructions } from "./settings/get-system-instructions";
-import { getHeaders } from "./settings/get-headers";
-import { options } from ".";
-import { debug } from "./utils/debug-log";
-import { colors } from "./utils/colors";
+import { type Response } from "./ai-response-schema.js";
+import { getSettings } from "./settings/get-settings.js";
+import { handleAction } from "./handle-action.js";
+import { getHeaders } from "./settings/get-headers.js";
+import { options } from "./arg-options.js";
+import { debug } from "./utils/debug-log.js";
+import { colors } from "./utils/colors.js";
+import { baseInstructions } from "./settings/settings-constants.js";
+import { getSystemInstructions } from "./settings/get-system-instructions.js";
 
 type Payload = {
   /**
@@ -38,7 +39,7 @@ type Payload = {
 
 let payload = {
   model: "gpt-4",
-  messages: [{ role: "system", content: systemInstructions }],
+  messages: [{ role: "system", content: baseInstructions }],
   temperature: 0.7,
 } as Payload;
 
@@ -49,7 +50,9 @@ export async function sendChat({
   message: string;
   isError?: boolean;
 }): Promise<Response> {
-  const settings = await getSettings();
+  payload.messages[0].content = await getSystemInstructions();
+
+  const settings = getSettings();
 
   if (settings.service === "custom" && settings.custom?.payload) {
     // Allow passing in custom payload for service "custom"
