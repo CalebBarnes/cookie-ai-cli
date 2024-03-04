@@ -1,16 +1,13 @@
 import { spawn } from "node:child_process";
 import { askQuestion } from "./ask-question";
 import { sendChat } from "./send-chat";
-import { Interface } from "readline";
 import { colors } from "./utils/colors";
 
 export async function handleCommand({
-  rl,
   command,
   values,
   description,
 }: {
-  rl: Interface;
   command: string;
   values?: Record<string, string>;
   description?: string;
@@ -28,7 +25,7 @@ export async function handleCommand({
       console.log(`description: ${colors.yellow}${description}${colors.reset}`);
     }
 
-    const answer = await askQuestion(rl, `Run this command? (y/n) `);
+    const answer = await askQuestion(`Run this command? (y/n) `);
 
     if (answer === "y") {
       console.log(
@@ -58,7 +55,6 @@ export async function handleCommand({
           await sendChat({
             isError: true,
             message: `Command exited with error code: ${code}\n${stderrOutput}`,
-            rl,
           });
         }
         console.log(``);

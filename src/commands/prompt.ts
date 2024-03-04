@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import { promptUser } from "../prompt-user";
 import { sendChat } from "../send-chat";
-import readline from "readline";
 
 export function registerPromptCommand(program: Command) {
   program
@@ -10,15 +9,10 @@ export function registerPromptCommand(program: Command) {
     .action(async (argv: string[]) => {
       const message = argv.join(" ");
 
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-      });
-
       if (!message) {
-        await promptUser(rl);
+        await promptUser();
       } else {
-        await sendChat({ message, rl });
+        await sendChat({ message });
       }
     });
 }
