@@ -1,7 +1,7 @@
 {
   "name": "cookie-ai-cli",
   "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
-  "version": "1.4.4",
+  "version": "1.4.4-beta.1",
   "type": "module",
   "bin": {
     "ai": "./dist/index.js"
