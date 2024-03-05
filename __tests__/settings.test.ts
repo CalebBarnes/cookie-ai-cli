@@ -1,41 +1,34 @@
-import { describe, it, expect } from "vitest";
+import fs from "fs";
+import { describe, it, expect, afterEach, beforeEach } from "vitest";
 import { saveSettings } from "../src/settings/save-settings.js";
-import { Settings, errors } from "../src/settings/settings-schema.js";
+import { errors } from "../src/settings/settings-schema.js";
 import { getSettings } from "../src/settings/get-settings.js";
-
-const TEST_SETTINGS_PATH = "./.tmp/test-settings.json";
+import {
+  mockInvalidSettingsMissingEndpoint,
+  mockOpenAISettings,
+} from "../__mocks__/mock-settings.js";
+import { TEST_SETTINGS_PATH } from "../__mocks__/test_constants.js";
 
 describe("settings", () => {
-  it("should save settings file", () => {
-    const settings: Settings = {
-      service: "openai",
-      openai: {
-        key: "missing-key",
-      },
-      model: "gpt-4",
-    };
-    saveSettings(settings, TEST_SETTINGS_PATH);
-    expect(getSettings(TEST_SETTINGS_PATH)).toEqual(settings);
+  beforeEach(() => {
+    saveSettings(mockOpenAISettings, TEST_SETTINGS_PATH);
+  });
+
+  afterEach(() => {
+    fs.rmSync(TEST_SETTINGS_PATH, {
+      force: true,
+    });
+  });
+
+  it("should save and load settings file", () => {
+    expect(getSettings(TEST_SETTINGS_PATH)).toEqual(mockOpenAISettings);
   });
 
   it("should throw validation errors and not overwrite existing settings", () => {
-    const validSettings: Settings = {
-      service: "custom",
-      endpoint: "http://localhost:8000/v1/chat/completions",
-      model: "gpt-4",
-    };
-
-    saveSettings(validSettings, TEST_SETTINGS_PATH);
-
-    const invalidSettings: Settings = {
-      service: "custom",
-      model: "gpt-4",
-    };
-
     expect(() => {
-      saveSettings(invalidSettings, TEST_SETTINGS_PATH);
+      saveSettings(mockInvalidSettingsMissingEndpoint, TEST_SETTINGS_PATH);
     }).toThrow(errors.ENDPOINT_REQUIRED);
 
-    expect(getSettings(TEST_SETTINGS_PATH)).toEqual(validSettings);
+    expect(getSettings(TEST_SETTINGS_PATH)).toEqual(mockOpenAISettings);
   });
 });

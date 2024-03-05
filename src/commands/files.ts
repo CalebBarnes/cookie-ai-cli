@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { Command } from "commander";
 import { getSettings } from "../settings/get-settings.js";
 import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
@@ -47,7 +48,10 @@ ${fileContents}
   return contents;
 }
 
-function addItem(files: string[], filePath = DEFAULT_SETTINGS_FILE_PATH) {
+export function addItem(
+  files: string[],
+  filePath = DEFAULT_SETTINGS_FILE_PATH
+) {
   if (!files.length) {
     debug.error("No files provided");
     // todo: use readline interface to list files and select checkboxes with space (TUI?)
@@ -58,8 +62,8 @@ function addItem(files: string[], filePath = DEFAULT_SETTINGS_FILE_PATH) {
 
   for (const file of files) {
     const exists = fs.existsSync(file);
-    const absolutePath = fs.realpathSync(file);
-    console.log({ absolutePath });
+    const absolutePath = path.resolve(file);
+
     if (!exists) {
       debug.error(`File or directory does not exist: ${absolutePath}`);
       return;
@@ -76,7 +80,10 @@ function addItem(files: string[], filePath = DEFAULT_SETTINGS_FILE_PATH) {
   return saveSettings(settings, filePath);
 }
 
-function removeItem(files: string[], filePath = DEFAULT_SETTINGS_FILE_PATH) {
+export function removeItem(
+  files: string[],
+  filePath = DEFAULT_SETTINGS_FILE_PATH
+) {
   if (!files.length) {
     debug.error("No files provided");
     return;
@@ -106,7 +113,7 @@ export function listFiles(filePath = DEFAULT_SETTINGS_FILE_PATH) {
       console.log(`${colors.green}• ${file}${colors.reset}`);
     }
   } else {
-    debug.error("No files added");
+    console.log("No files added");
   }
 }
 
