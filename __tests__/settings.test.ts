@@ -7,7 +7,9 @@ import {
   mockInvalidSettingsMissingEndpoint,
   mockOpenAISettings,
 } from "../__mocks__/mock-settings.js";
-import { TEST_SETTINGS_PATH } from "../__mocks__/test_constants.js";
+import { TEST_DIR } from "../__mocks__/test_constants.js";
+
+const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings.json`;
 
 describe("settings", () => {
   beforeEach(() => {

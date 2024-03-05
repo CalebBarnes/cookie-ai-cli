@@ -8,9 +8,11 @@ import {
   getFilesMessage,
   removeItem,
 } from "../src/commands/files";
-import { TEST_DIR, TEST_SETTINGS_PATH } from "../__mocks__/test_constants";
+import { TEST_DIR } from "../__mocks__/test_constants";
 import { getSettings } from "../src/settings/get-settings";
 import { saveSettings } from "../src/settings/save-settings";
+
+const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings-files.json`;
 
 describe("files", () => {
   beforeEach(() => {
