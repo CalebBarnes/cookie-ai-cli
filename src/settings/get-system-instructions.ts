@@ -7,7 +7,7 @@ import {
 
 export async function getSystemInstructions(
   filePath = DEFAULT_SETTINGS_FILE_PATH
-) {
+): Promise<string> {
   let instructions = baseInstructions;
 
   const settings = getSettings(filePath);

@@ -1,13 +1,13 @@
+import { askQuestion } from "../ask-question.js";
+import { debug } from "../utils/debug-log.js";
 import { saveSettings } from "./save-settings.js";
 import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
-import { askQuestion } from "../ask-question.js";
 import { type Settings, services } from "./settings-schema.js";
-import { debug } from "../utils/debug-log.js";
 
 export async function initializeSettings(
   settingsPath = DEFAULT_SETTINGS_FILE_PATH
-) {
-  let settings: Settings = {
+): Promise<void> {
+  const settings: Settings = {
     service: "openai",
     model: "gpt-4",
   };
@@ -27,6 +27,7 @@ export async function initializeSettings(
       settings.headers = await askForCustomHeaders();
       break;
     default:
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- Handles invalid service
       throw new Error(`Invalid service: ${settings.service}`);
   }
 
@@ -42,7 +43,7 @@ export async function initializeSettings(
   saveSettings(settings, settingsPath);
 }
 
-async function askForCustomHeaders() {
+async function askForCustomHeaders(): Promise<Record<string, string>> {
   console.log(
     "Enter custom headers. Type 'done' as the header key when finished."
   );

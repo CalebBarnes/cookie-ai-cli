@@ -1,4 +1,4 @@
-import { Settings } from "../src/settings/settings-schema";
+import { type Settings } from "../src/settings/settings-schema";
 
 export const mockOpenAISettings: Settings = {
   service: "openai",

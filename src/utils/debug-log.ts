@@ -4,8 +4,8 @@ function debugLog(
   message: string | Record<string, unknown>,
   level: "error" | "log" | "warn" | "info" = "log",
   overridePrefix?: string
-) {
-  const prefix = overridePrefix || "[cookie-ai-cli]";
+): void {
+  const prefix = overridePrefix ?? "[cookie-ai-cli]";
   const prefixColor = "\x1b[32m";
 
   const messagePrefix = (() => {
@@ -34,7 +34,6 @@ function debugLog(
     }
   })();
 
-  // eslint-disable-next-line no-console -- this is a utility for logging
   console[level](
     `${prefixColor}${prefix}${reset}${levelPrefix}${reset} ${messagePrefix}${
       typeof message === "object"

@@ -8,7 +8,7 @@ import { colors } from "./utils/colors.js";
 import { baseInstructions } from "./settings/settings-constants.js";
 import { getSystemInstructions } from "./settings/get-system-instructions.js";
 
-type Payload = {
+interface Payload {
   /**
    * ID of the model to use for chat completion.
    * See the model endpoint compatibility table for details on which models work with the Chat API.
@@ -35,8 +35,16 @@ type Payload = {
    * If not set, the correct template will be guessed using the regex expressions in models/config.yaml.
    */
   instruction_template?: string;
-};
+}
 
+interface Choice {
+  message: { role: string; content: string };
+}
+interface ResponseJson {
+  choices: Choice[];
+}
+
+// eslint-disable-next-line prefer-const -- This is a asdasd
 let payload = {
   model: "gpt-4",
   messages: [{ role: "system", content: baseInstructions }],
@@ -50,13 +58,14 @@ export async function sendChat({
   message: string;
   isError?: boolean;
 }): Promise<Response | undefined> {
-  payload.messages[0].content = await getSystemInstructions();
+  if (payload.messages[0]) {
+    payload.messages[0].content = await getSystemInstructions();
+  }
 
   const settings = getSettings();
 
   if (settings.service === "custom" && settings.custom?.payload) {
-    // Allow passing in custom payload for service "custom"
-    Object.assign(payload, settings.custom?.payload);
+    Object.assign(payload, settings.custom.payload);
   }
 
   if (settings.model) {
@@ -76,7 +85,9 @@ export async function sendChat({
       : settings.endpoint;
 
   if (!endpoint) {
-    debug.error(`Failed to resolve endpoint from settings: ${settings}`);
+    debug.error(
+      `Failed to resolve endpoint from settings: ${JSON.stringify(settings, null, 2)}`
+    );
     process.exit(1);
   }
 
@@ -92,9 +103,9 @@ export async function sendChat({
 
   console.log(`${colors.green}✅ AI responded!${colors.reset}`);
 
-  let responseJson;
+  let responseJson: ResponseJson;
   try {
-    responseJson = await response.json();
+    responseJson = (await response.json()) as ResponseJson;
     if (options.debug) {
       console.log("responseJson", responseJson);
     }
@@ -104,26 +115,55 @@ export async function sendChat({
     process.exit(1);
   }
 
-  const aiResponseChatMessage = responseJson?.choices?.[0]?.message;
+  const aiResponseChatMessage = responseJson.choices[0]?.message;
   if (!aiResponseChatMessage) {
-    await handleEmptyResponse();
+    switch (settings.service) {
+      case "openai":
+        debug.error(
+          `No message in response from the AI.
+    Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits 
+    and that you have enough credits to use the API.
+    
+    Make sure you're also using the correct API key and model.
+    `
+        );
+        break;
+      default:
+        debug.error(
+          `No message in response from the AI. Check that your custom endpoint is working correctly.`
+        );
+    }
+    process.exit(1);
   }
+
   // add the AI response to the chat history
   payload.messages.push(aiResponseChatMessage);
   if (options.debug) {
     console.log("payload", payload);
   }
 
-  const aiResponseContent = responseJson?.choices?.[0]?.message?.content;
+  const aiResponseContent = responseJson.choices[0]?.message?.content ?? "";
   let pamperedResponseData;
-  const json = aiResponseContent?.slice(
+  const json = aiResponseContent.slice(
     aiResponseContent.indexOf("{"),
     aiResponseContent.lastIndexOf("}") + 1
   );
 
   try {
     pamperedResponseData = JSON.parse(json) as Response;
-    await handleAction({ result: pamperedResponseData });
+    const actionResult = await handleAction({ result: pamperedResponseData });
+    console.log({ actionResult });
+
+    if (actionResult.error?.code === "unsupported_action") {
+      // console.log(
+      //   `${colors.red}AI tried to use unsupported action "${result.action}", asking AI to retry: ${colors.reset}`,
+      //   result.action
+      // );
+      console.error(actionResult.error.message);
+      await sendChat({
+        message: actionResult.error.message,
+      });
+    }
   } catch (error) {
     debug.error("Failed to parse AI response as JSON");
     debug.log("Asking AI to retry...");
@@ -138,19 +178,4 @@ export async function sendChat({
   }
 
   return pamperedResponseData;
-}
-
-async function handleEmptyResponse() {
-  const settings = await getSettings();
-  if (settings.service === "openai") {
-    debug.error(
-      `No message in response from the AI.
-Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits 
-and that you have enough credits to use the API.
-
-Make sure you're also using the correct API key and model.
-`
-    );
-  }
-  process.exit(1);
 }

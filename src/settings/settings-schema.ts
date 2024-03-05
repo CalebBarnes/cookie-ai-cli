@@ -51,7 +51,7 @@ export const settingsSchema = z
   .refine(
     (data) => {
       if (data.service === "openai") {
-        return !!data.openai?.key;
+        return Boolean(data.openai?.key);
       }
       return true;
     },
@@ -75,9 +75,11 @@ export const settingsSchema = z
 
 export type Settings = z.infer<typeof settingsSchema>;
 
-export function validateSettings(settings: Settings) {
+export function validateSettings(settings: unknown): Settings {
   const result = settingsSchema.safeParse(settings);
   if (!result.success) {
     throw new Error(result.error.issues.map((i) => i.message).join("\n"));
   }
+
+  return result.data;
 }

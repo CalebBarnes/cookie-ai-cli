@@ -1,16 +1,16 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it, vi, expect, afterEach, beforeEach } from "vitest";
 import { mockOpenAISettings } from "../__mocks__/mock-settings";
+import { TEST_DIR } from "../__mocks__/test-constants";
+import { getSettings } from "../src/settings/get-settings";
+import { saveSettings } from "../src/settings/save-settings";
 import {
   listFiles,
   addItem,
   getFilesMessage,
   removeItem,
 } from "../src/commands/files";
-import { TEST_DIR } from "../__mocks__/test_constants";
-import { getSettings } from "../src/settings/get-settings";
-import { saveSettings } from "../src/settings/save-settings";
 
 const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings-files.json`;
 
@@ -28,7 +28,12 @@ describe("files", () => {
   it("should log that no files are added yet", () => {
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     listFiles(TEST_SETTINGS_PATH);
-    expect(consoleSpy).toHaveBeenCalledWith("No files added");
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /No files added. You can use the "files add <filepath>" command to add files to the list./
+      )
+    );
+
     consoleSpy.mockRestore();
   });
 
@@ -91,10 +96,9 @@ describe("files", () => {
     const text = await getFilesMessage(TEST_SETTINGS_PATH);
 
     expect(text).toEqual(
-      path.resolve(TEST_FILE_PATH) +
-        ":\nHello, World!\n\n" +
-        path.resolve(TEST_FILE_PATH + 2) +
-        ":\nHello, World!\n\n"
+      `${path.resolve(TEST_FILE_PATH)}:\nHello, World!\n\n${path.resolve(
+        TEST_FILE_PATH + 2
+      )}:\nHello, World!\n\n`
     );
 
     fs.rmSync(TEST_FILE_PATH);

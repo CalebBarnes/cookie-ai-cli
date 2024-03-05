@@ -1,4 +1,4 @@
-import readline from "readline";
+import readline from "node:readline";
 import { colors } from "./utils/colors.js";
 
 export function askQuestion(
@@ -25,18 +25,17 @@ export function askQuestion(
     rl.question(fullQuery, (answer) => {
       if (Array.isArray(options) && options.length > 0) {
         const choice = parseInt(answer, 10);
-        // Check if the choice is a valid number within the options range
         if (!isNaN(choice) && choice >= 1 && choice <= options.length) {
-          resolve(options[choice - 1]);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We already checked that the choice is within the range
+          resolve(options[choice - 1]!);
         } else {
           console.log(
             `${colors.red}Invalid choice, please try again.${colors.reset}`
           );
           rl.close();
-          resolve(askQuestion(query, options)); // Recursively ask again
+          resolve(askQuestion(query, options));
         }
       } else {
-        // For a simple query, directly resolve the answer
         rl.close();
         resolve(answer);
       }

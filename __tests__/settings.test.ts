@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 import { describe, it, expect, afterEach, beforeEach } from "vitest";
 import { saveSettings } from "../src/settings/save-settings.js";
 import { errors } from "../src/settings/settings-schema.js";
@@ -7,7 +7,7 @@ import {
   mockInvalidSettingsMissingEndpoint,
   mockOpenAISettings,
 } from "../__mocks__/mock-settings.js";
-import { TEST_DIR } from "../__mocks__/test_constants.js";
+import { TEST_DIR } from "../__mocks__/test-constants.js";
 
 const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings.json`;
 

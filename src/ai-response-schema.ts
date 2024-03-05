@@ -50,7 +50,7 @@ export interface UserInfoRequiredMessageContent {
    * The values to request from the user
    * @example [{ label: "Enter your username: ", value: "{user}" }]
    */
-  values: Array<{ label: string; value: string }>;
+  values: { label: string; value: string }[];
 
   /**
    * A short description of what the command will do

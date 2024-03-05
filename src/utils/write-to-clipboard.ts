@@ -1,6 +1,6 @@
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 
-export async function writeToClipboard(text: string) {
+export function writeToClipboard(text: string): boolean {
   const platform = process.platform;
 
   try {

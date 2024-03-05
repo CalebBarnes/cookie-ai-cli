@@ -1,13 +1,13 @@
-import os from "os";
-import fs from "fs";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
+import os from "node:os";
+import fs from "node:fs";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const DEFAULT_SETTINGS_FILE_PATH = `${os.homedir()}/.cookie-ai/settings.json`;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-function getSchemaFilePath() {
+function getSchemaFilePath(): string {
   const possiblePaths = [
     path.join(__dirname, "ai-response-schema.ts"), // For development
     path.join(__dirname, "../ai-response-schema.ts"), // For production (if __dirname is inside /dist)
@@ -65,5 +65,8 @@ ${JSON.stringify({
 
 User Home Directory: ${os.homedir()}
 Current Working Directory: ${process.cwd()}
-Current Directory Files: ${fs.readdirSync(process.cwd())}
+Current Directory Files: ${fs
+  .readdirSync(process.cwd())
+  .map((f) => f)
+  .join("\n ")}
 `;
