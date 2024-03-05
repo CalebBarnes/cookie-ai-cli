@@ -6,7 +6,7 @@ import { getSettings } from "../src/settings/get-settings.js";
 const TEST_SETTINGS_PATH = "./.tmp/test-settings.json";
 
 describe("settings", () => {
-  it("save settings file", () => {
+  it("should save settings file", () => {
     const settings: Settings = {
       service: "openai",
       openai: {
