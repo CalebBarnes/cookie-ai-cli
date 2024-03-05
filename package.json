@@ -1,37 +1,36 @@
 {
   "name": "cookie-ai-cli",
-  "version": "1.4.3",
+  "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
+  "version": "1.4.4-beta.1",
+  "type": "module",
   "bin": {
-    "ai": "./dist/main.js"
+    "ai": "./dist/index.js"
   },
   "files": [
     "dist"
   ],
-  "description": "A command-line interface tool designed to bridge the gap between natural language processing and command-line operations.",
   "repository": "github:CalebBarnes/cookie-ai-cli",
   "author": "Caleb Barnes <https://github.com/CalebBarnes>",
   "license": "MIT",
   "scripts": {
-    "copy-ts-file": "cp src/ai-response-schema.ts dist/",
-    "build": "tsc && npm run copy-ts-file",
+    "build": "tsc",
+    "postbuild": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w & npm run copy-ts-file",
-    "start": "node ./dist/main.js what is my ip",
-    "dev:init": "nodemon dist/main.js --init",
-    "dev": "nodemon dist/main.js",
-    "dev:watch": "concurrently \"npm:build:watch\" \"npm:dev\"",
-    "dev:error": "nodemon dist/main.js run a simple command that will throw an error in stderr",
-    "dev:debug": "nodemon dist/main.js rename my git branch --debug",
-    "dev:version": "nodemon dist/main.js --version"
+    "start": "node ./dist/index.js",
+    "start:ip": "node ./dist/index.js what is my ip --debug",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.0.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.2"
+    "@types/node": "^20.11.24",
+    "@vitest/ui": "^1.3.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
   },
   "keywords": [
     "ai",

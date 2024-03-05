@@ -1,11 +1,12 @@
-import { type Response } from "./ai-response-schema";
-import { getSettings } from "./settings/get-settings";
-import { handleAction } from "./handle-action";
-import { systemInstructions } from "./settings/settings-constants";
-import { getHeaders } from "./settings/get-headers";
-import { isDebug } from "./main";
-import { debug } from "./utils/debug-log";
-import { colors } from "./utils/colors";
+import { type Response } from "./ai-response-schema.js";
+import { getSettings } from "./settings/get-settings.js";
+import { handleAction } from "./handle-action.js";
+import { getHeaders } from "./settings/get-headers.js";
+import { options } from "./arg-options.js";
+import { debug } from "./utils/debug-log.js";
+import { colors } from "./utils/colors.js";
+import { baseInstructions } from "./settings/settings-constants.js";
+import { getSystemInstructions } from "./settings/get-system-instructions.js";
 
 type Payload = {
   /**
@@ -38,20 +39,20 @@ type Payload = {
 
 let payload = {
   model: "gpt-4",
-  messages: [{ role: "system", content: systemInstructions }],
+  messages: [{ role: "system", content: baseInstructions }],
   temperature: 0.7,
 } as Payload;
 
 export async function sendChat({
   message,
-  rl,
   isError,
 }: {
   message: string;
-  rl: any;
   isError?: boolean;
-}): Promise<Response> {
-  const settings = await getSettings({ rl });
+}): Promise<Response | undefined> {
+  payload.messages[0].content = await getSystemInstructions();
+
+  const settings = getSettings();
 
   if (settings.service === "custom" && settings.custom?.payload) {
     // Allow passing in custom payload for service "custom"
@@ -94,7 +95,7 @@ export async function sendChat({
   let responseJson;
   try {
     responseJson = await response.json();
-    if (isDebug) {
+    if (options.debug) {
       console.log("responseJson", responseJson);
     }
   } catch (err) {
@@ -105,11 +106,11 @@ export async function sendChat({
 
   const aiResponseChatMessage = responseJson?.choices?.[0]?.message;
   if (!aiResponseChatMessage) {
-    await handleEmptyResponse({ rl });
+    await handleEmptyResponse();
   }
   // add the AI response to the chat history
   payload.messages.push(aiResponseChatMessage);
-  if (isDebug) {
+  if (options.debug) {
     console.log("payload", payload);
   }
 
@@ -122,26 +123,25 @@ export async function sendChat({
 
   try {
     pamperedResponseData = JSON.parse(json) as Response;
-    await handleAction({ result: pamperedResponseData, rl });
+    await handleAction({ result: pamperedResponseData });
   } catch (error) {
     debug.error("Failed to parse AI response as JSON");
     debug.log("Asking AI to retry...");
-    if (isDebug) {
+    if (options.debug) {
       console.log("AI Response: ");
       console.log(aiResponseContent);
     }
     await sendChat({
       isError: true,
       message: "Your last response was not valid JSON. Please try again.",
-      rl,
     });
   }
 
   return pamperedResponseData;
 }
 
-async function handleEmptyResponse({ rl }) {
-  const settings = await getSettings({ rl });
+async function handleEmptyResponse() {
+  const settings = await getSettings();
   if (settings.service === "openai") {
     debug.error(
       `No message in response from the AI.

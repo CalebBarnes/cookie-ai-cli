@@ -1,9 +1,10 @@
-import { Settings } from "./settings-schema";
+import { Settings } from "./settings-schema.js";
 
 export function getHeaders(settings: Settings) {
   const headers = {
     "Content-Type": "application/json",
-  };
+  } as Record<string, string>;
+
   if (settings.service === "openai") {
     headers["Authorization"] = `Bearer ${settings.openai?.key}`;
   }

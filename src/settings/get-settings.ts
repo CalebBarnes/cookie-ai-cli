@@ -1,33 +1,31 @@
-import { initializeSettings } from "./initialize-settings";
-import { settingsFilePath } from "./settings-constants";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
 import fs from "fs";
-import readline from "readline";
-import { Settings, validateSettings } from "./settings-schema";
-import { debug } from "../utils/debug-log";
+import { Settings, validateSettings } from "./settings-schema.js";
+import { debug } from "../utils/debug-log.js";
+import { options } from "../arg-options.js";
 
-export async function getSettings({
-  rl,
-}: {
-  rl: readline.Interface;
-}): Promise<Settings> {
+export function getSettings(filePath = DEFAULT_SETTINGS_FILE_PATH) {
   let settings: Settings | undefined;
-  let settingsFile: string | undefined;
+  let file: string | undefined;
 
   try {
-    settingsFile = fs.readFileSync(settingsFilePath, "utf8");
-  } catch (error) {
-    await initializeSettings(rl);
+    file = fs.readFileSync(filePath, "utf8");
+  } catch (error: any) {
+    options.debug && debug.error("Error reading settings file", error);
   }
 
   try {
-    if (settingsFile) {
-      settings = JSON.parse(settingsFile);
+    if (file) {
+      settings = JSON.parse(file);
     }
   } catch (error) {
-    debug.error(
-      `Error parsing JSON ${settingsFilePath}\n\nYou can edit your settings file manually to resolve the issue, or try reinitializing a new settings file by running the following command: \n\x1b[36mai --init\n`
+    throw new Error(
+      `Error parsing JSON: ${filePath}
+
+You can edit your settings file manually to resolve the issue, or try reinitializing a new settings file by running the following command: 
+\x1b[36mai --init
+`
     );
-    process.exit(1);
   }
 
   if (settings) {
@@ -35,6 +33,5 @@ export async function getSettings({
     return settings;
   }
 
-  debug.error("Failed to read settings file");
-  process.exit(1);
+  throw new Error("Failed to read settings file");
 }

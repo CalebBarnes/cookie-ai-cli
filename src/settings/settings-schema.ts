@@ -1,51 +1,83 @@
 import { z } from "zod";
-import { debug } from "../utils/debug-log";
-import { settingsDir } from "./settings-constants";
 
-const errors = {
+export const services = ["openai", "custom"] as const;
+
+export const errors = {
   OPENAI_KEY_REQUIRED: "'openai.key' is required when using service 'openai'",
   ENDPOINT_REQUIRED: "'endpoint' is required when using service 'custom'",
+  MODEL_REQUIRED: "'model' is required. (example: 'gpt-4')",
 };
-
-const openaiSchema = z.object({
-  key: z.string({
-    required_error: errors.OPENAI_KEY_REQUIRED,
-  }),
-});
-const customSchema = z.object({
-  payload: z.record(z.string()).optional(),
-});
 
 export const settingsSchema = z
   .object({
-    endpoint: z.string().url().optional(),
     service: z.enum(["custom", "openai"]),
+    /**
+     * Model to be used for requests
+     */
     model: z.string({
-      required_error: "'model' is required. (example: 'gpt-4')",
+      required_error: errors.MODEL_REQUIRED,
     }),
-    openai: openaiSchema.optional(),
-    custom: customSchema.optional(),
+    /**
+     * OpenAI API key to be used for requests, when using service 'openai'
+     */
+    openai: z
+      .object({
+        key: z.string({
+          required_error: errors.OPENAI_KEY_REQUIRED,
+        }),
+      })
+      .optional(),
+    /**
+     * Custom payload to be sent with the request, when using service 'custom'
+     */
+    custom: z
+      .object({
+        payload: z.record(z.string()).optional(),
+      })
+      .optional(),
+    /**
+     * Custom endpoint to send the request to (only used when service is 'custom')
+     */
+    endpoint: z.string().url().optional(),
+    /**
+     * Additional headers to be sent with the request
+     */
     headers: z.record(z.string()).optional(),
+    /**
+     * List of files whose contents will be provided as context to the model
+     */
+    files: z.array(z.string()).optional(),
   })
-  .refine((data) => data.service !== "openai" || data.openai, {
-    message: errors.OPENAI_KEY_REQUIRED,
-    path: ["openai"],
-  })
-  .refine((data) => data.service !== "custom" || data.endpoint, {
-    message: errors.ENDPOINT_REQUIRED,
-    path: ["endpoint"],
-  });
+  .refine(
+    (data) => {
+      if (data.service === "openai") {
+        return !!data.openai?.key;
+      }
+      return true;
+    },
+    {
+      message: errors.OPENAI_KEY_REQUIRED,
+      path: ["openai"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.service === "custom" && !data.endpoint) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: errors.ENDPOINT_REQUIRED,
+      path: ["endpoint"],
+    }
+  );
 
 export type Settings = z.infer<typeof settingsSchema>;
 
-export function validateSettings(settings) {
+export function validateSettings(settings: Settings) {
   const result = settingsSchema.safeParse(settings);
   if (!result.success) {
-    for (const error of result.error.issues) {
-      debug.error(`settings.json: ${error.message}\n
-You can edit your settings file at file://${settingsDir}
-or run 'ai --init' to re-initialize your settings.\n`);
-    }
-    process.exit(1);
+    throw new Error(result.error.issues.map((i) => i.message).join("\n"));
   }
 }

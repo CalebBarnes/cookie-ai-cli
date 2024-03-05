@@ -1,73 +1,63 @@
-import fs from "fs";
-import { saveSettings } from "./save-settings";
-import { services, settingsDir, settingsFilePath } from "./settings-constants";
-import { askQuestion } from "../ask-question";
-import readline from "readline";
-import { Settings } from "./settings-schema";
-import { debug } from "../utils/debug-log";
-import { isDebug } from "../main";
+import { saveSettings } from "./save-settings.js";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
+import { askQuestion } from "../ask-question.js";
+import { type Settings, services } from "./settings-schema.js";
+import { debug } from "../utils/debug-log.js";
 
-export async function initializeSettings(rl: readline.Interface) {
-  fs.mkdirSync(settingsDir, { recursive: true });
-
+export async function initializeSettings(
+  settingsPath = DEFAULT_SETTINGS_FILE_PATH
+) {
   let settings: Settings = {
     service: "openai",
     model: "gpt-4",
   };
 
-  settings.service = (await askQuestion(rl, "Select the API service to use: ", [
+  settings.service = (await askQuestion("Select the API service to use: ", [
     ...services,
   ])) as Settings["service"];
 
-  if (settings.service === "custom") {
-    settings.endpoint = await askQuestion(rl, "Enter the API endpoint: ");
+  switch (settings.service) {
+    case "openai":
+      settings.openai = {
+        key: await askQuestion("Enter your OpenAI API key: "),
+      };
+      break;
+    case "custom":
+      settings.endpoint = await askQuestion("Enter the API endpoint: ");
+      settings.headers = await askForCustomHeaders();
+      break;
+    default:
+      throw new Error(`Invalid service: ${settings.service}`);
   }
-  if (settings.service === "openai") {
-    settings.openai = {
-      key: await askQuestion(rl, "Enter your OpenAI API key: "),
-    };
-  }
-  if (settings.service === "custom") {
-    console.log(
-      "Enter custom headers. Type 'done' as the header key when finished."
-    );
-    settings.headers = await askForCustomHeaders(rl);
-  }
-  const modelAnswer = await askQuestion(
-    rl,
+
+  const model = await askQuestion(
     "Enter your model (leave blank for default: gpt-4): "
   );
-  if (modelAnswer) {
-    settings.model = modelAnswer;
-  }
+  settings.model = model || "gpt-4";
 
   debug.info(
-    `Saving settings at ${settingsFilePath}:\n${JSON.stringify(
-      settings,
-      null,
-      2
-    )}}`
+    `Saving settings at ${settingsPath}:\n${JSON.stringify(settings, null, 2)}}`
   );
 
-  saveSettings(settings);
-  rl.close();
-  process.exit(0);
+  saveSettings(settings, settingsPath);
 }
 
-async function askForCustomHeaders(rl) {
-  const headers = {};
+async function askForCustomHeaders() {
+  console.log(
+    "Enter custom headers. Type 'done' as the header key when finished."
+  );
+  const headers = {} as Record<string, string>;
   let addingHeaders = true;
 
   while (addingHeaders) {
     const key = await askQuestion(
-      rl,
       "Enter header key (or type 'done' to finish): "
     );
 
     if (key.toLowerCase() === "done") {
       addingHeaders = false;
     } else {
-      const value = await askQuestion(rl, `Enter value for header '${key}': `);
+      const value = await askQuestion(`Enter value for header '${key}': `);
       headers[key] = value;
     }
   }

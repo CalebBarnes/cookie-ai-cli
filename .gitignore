@@ -1,3 +1,7 @@
 dist
 node_modules
 .DS_Store
+.cookieai
+.tmp
+.DS_Store
+*.env*

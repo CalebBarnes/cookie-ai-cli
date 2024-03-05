@@ -28,14 +28,6 @@ npm install -g cookie-ai-cli
 
 ## Configuration
 
-### Requirements
-
-The CLI is executed with [Bun](https://bun.sh/). Install Bun with:
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
 ### Initialization
 
 Initialize your configuration with:
