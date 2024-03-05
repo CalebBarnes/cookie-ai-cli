@@ -4,3 +4,4 @@ node_modules
 .cookieai
 .tmp
 .DS_Store
+*.env*
