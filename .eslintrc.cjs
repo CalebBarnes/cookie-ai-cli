@@ -5,10 +5,13 @@ const project = path.resolve(__dirname, "tsconfig.json");
 module.exports = {
   ignorePatterns: ["node_modules/", "dist/", "__tests__/", "__mocks__/"],
   extends: [
-    "@vercel/style-guide/eslint/node",
-    "@vercel/style-guide/eslint/typescript",
-  ].map(require.resolve),
-
+    "plugin:require-extensions/recommended",
+    ...[
+      "@vercel/style-guide/eslint/node",
+      "@vercel/style-guide/eslint/typescript",
+    ].map(require.resolve),
+  ],
+  plugins: ["require-extensions"],
   parserOptions: {
     project,
   },
@@ -19,9 +22,7 @@ module.exports = {
       },
     },
   },
-
   rules: {
-    // "import/extensions": ["error", "always", { ts: "never", tsx: "never" }],
     "tsdoc/syntax": "off",
   },
 };
