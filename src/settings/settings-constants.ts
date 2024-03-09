@@ -52,6 +52,8 @@ AI Response:
   "description": "Changes the current working directory to the project directory and then runs the command"
 }
 
+If the user wants to do something like "install x" but there is no command to install it, you can run a command to open a web browser to the installation page, or if that is unknown, you can open a google search in the browser instead.
+
 Respond only in JSON that satisfies the Response type:
 ${schemaString}
 

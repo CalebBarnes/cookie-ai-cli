@@ -7,6 +7,7 @@ import { logger } from "./utils/debug-log.js";
 import { colors } from "./utils/colors.js";
 import { baseInstructions } from "./settings/settings-constants.js";
 import { getSystemInstructions } from "./settings/get-system-instructions.js";
+import { askQuestion } from "./ask-question.js";
 
 interface Payload {
   /**
@@ -44,8 +45,7 @@ interface ResponseJson {
   choices: Choice[];
 }
 
-// eslint-disable-next-line prefer-const -- This is a asdasd
-let payload = {
+const payload = {
   model: "gpt-4",
   messages: [{ role: "system", content: baseInstructions }],
   temperature: 0.7,
@@ -63,11 +63,9 @@ export async function sendChat({
   }
 
   const settings = getSettings();
-
   if (settings.service === "custom" && settings.custom?.payload) {
     Object.assign(payload, settings.custom.payload);
   }
-
   if (settings.model) {
     payload.model = settings.model;
   }
@@ -83,7 +81,6 @@ export async function sendChat({
     settings.service === "openai"
       ? "https://api.openai.com/v1/chat/completions"
       : settings.endpoint;
-
   if (!endpoint) {
     logger.error(
       `Failed to resolve endpoint from settings: ${JSON.stringify(settings, null, 2)}`
@@ -101,7 +98,7 @@ export async function sendChat({
     process.exit(1);
   }
 
-  logger.log(`${colors.green}✅ AI responded!${colors.reset}`);
+  logger.log(`${colors.green}✅ AI responded!${colors.reset}`, "");
 
   let responseJson: ResponseJson;
   try {
@@ -139,7 +136,6 @@ export async function sendChat({
     process.exit(1);
   }
 
-  // add the AI response to the chat history
   payload.messages.push(aiResponseChatMessage);
   if (options.debug) {
     logger.log("payload:");
@@ -156,14 +152,23 @@ export async function sendChat({
   try {
     pamperedResponseData = JSON.parse(json) as Response;
     const actionResult = await handleAction({ result: pamperedResponseData });
-    logger.log({ actionResult });
+    if (actionResult.success) {
+      const nextMessage = await askQuestion("➜");
+      await sendChat({
+        message: nextMessage,
+      });
+    }
 
     if (actionResult.error?.code === "unsupported_action") {
-      // logger.log(
-      //   `${colors.red}AI tried to use unsupported action "${result.action}", asking AI to retry: ${colors.reset}`,
-      //   result.action
-      // );
-      logger.error(actionResult.error.message);
+      const unsupportedAction = pamperedResponseData.action as
+        | string
+        | undefined;
+
+      logger.log(
+        `${colors.red}AI tried to use unsupported action "${unsupportedAction}", asking AI to retry: ${colors.reset}`,
+        unsupportedAction
+      );
+
       await sendChat({
         message: actionResult.error.message,
       });

@@ -10,7 +10,7 @@ export function registerPromptCommand(program: Command): void {
       const message = argv.join(" ");
 
       if (!message) {
-        const answer = await askQuestion("What do you want to do?");
+        const answer = await askQuestion("➜");
         await sendChat({ message: answer });
       } else {
         await sendChat({ message });

@@ -58,7 +58,21 @@ export interface UserInfoRequiredMessageContent {
   description: string;
 }
 
+export interface MessageToUserContent {
+  /**
+   * The action to take when there is no command to run, but you just need to display a message to the user instead.
+   * Prefer running commands in most cases to make the user's life easier. Only use this when you need to display a message to the user.
+   * If the user asks a question and you are about to answer the question directly, use this action to display the answer to the user instead.
+   */
+  action: "message_to_user";
+  /**
+   * The message to display to the user
+   */
+  message: string;
+}
+
 export type Response =
   | CommandMessageContent
   | CommandListMessageContent
-  | UserInfoRequiredMessageContent;
+  | UserInfoRequiredMessageContent
+  | MessageToUserContent;

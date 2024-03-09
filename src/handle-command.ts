@@ -21,9 +21,12 @@ export async function handleCommand({
       return values[keyWithBraces] ?? `{${match}}`; // Replace with value or keep the placeholder if value is not found
     });
   }
-  logger.log(`command: ${colors.red}${fullCommand}${colors.reset}`);
+  logger.log(`command: ${colors.red}${fullCommand}${colors.reset}`, "");
   if (description) {
-    logger.log(`description: ${colors.yellow}${description}${colors.reset}`);
+    logger.log(
+      `description: ${colors.yellow}${description}${colors.reset}`,
+      ""
+    );
   }
 
   const answer = await askQuestion(
@@ -42,9 +45,6 @@ export async function handleCommand({
     }
 
     case "r": {
-      // const answer = await askQuestion("Revise command: ");
-      // await sendChat({ message: `Revise command: ${answer}` });
-      logger.log("Command aborted.");
       break;
     }
     default: {

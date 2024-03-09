@@ -17,6 +17,7 @@
     "copy-ts-file": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w",
     "start": "node --no-warnings=ExperimentalWarning ./dist/index",
+    "start:debug": "node --no-warnings=ExperimentalWarning ./dist/index --debug",
     "start:ip": "pnpm start what is my ip",
     "test": "vitest",
     "test:ui": "vitest --ui",

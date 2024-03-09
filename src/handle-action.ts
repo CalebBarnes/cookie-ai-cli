@@ -4,6 +4,50 @@ import {
 } from "./ai-response-schema.js";
 import { askQuestion } from "./ask-question.js";
 import { handleCommand } from "./handle-command.js";
+import { logger } from "./utils/debug-log.js";
+
+export async function handleAction({ result }: { result: Response }): Promise<{
+  success: boolean;
+  error?: {
+    code: string;
+    message: string;
+  };
+}> {
+  switch (result.action) {
+    case "command": {
+      await handleCommand(result);
+      return { success: true };
+    }
+
+    case "command_list": {
+      await commandListAction(result);
+      return { success: true };
+    }
+
+    case "user_info_required": {
+      await userInfoRequiredAction(result);
+      return { success: true };
+    }
+
+    case "message_to_user": {
+      logger.log(result.message);
+      return { success: true };
+    }
+
+    default: {
+      const unknownResult = result as {
+        action?: string;
+      };
+      return {
+        success: false,
+        error: {
+          code: "unsupported_action",
+          message: `${unknownResult.action ? `${unknownResult.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
+        },
+      };
+    }
+  }
+}
 
 export async function commandListAction({
   commands,
@@ -41,43 +85,5 @@ export async function userInfoRequiredAction(
       values,
       description: result.description,
     });
-  }
-}
-
-export async function handleAction({ result }: { result: Response }): Promise<{
-  success: boolean;
-  error?: {
-    code: string;
-    message: string;
-  };
-}> {
-  switch (result.action) {
-    case "command": {
-      await handleCommand(result);
-      return { success: true };
-    }
-
-    case "command_list": {
-      await commandListAction(result);
-      return { success: true };
-    }
-
-    case "user_info_required": {
-      await userInfoRequiredAction(result);
-      return { success: true };
-    }
-
-    default: {
-      const unknownResult = result as {
-        action?: string;
-      };
-      return {
-        success: false,
-        error: {
-          code: "unsupported_action",
-          message: `${unknownResult.action ? `${unknownResult.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
-        },
-      };
-    }
   }
 }
