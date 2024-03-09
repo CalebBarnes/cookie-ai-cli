@@ -21,22 +21,25 @@ module.exports = {
   },
 
   rules: {
-    "@typescript-eslint/no-empty-function": "off",
-    "no-console": "off",
+    "import/extensions": ["error", "always", { ts: "never", tsx: "never" }],
+    // "node/file-extension-in-import": ["error", "always"],
+
+    // "@typescript-eslint/no-empty-function": "off",
+    // "no-console": "off",
     "tsdoc/syntax": "off",
-    "import/order": [
-      "warn",
-      {
-        groups: [
-          "builtin", // Node.js built-in modules
-          "external", // Packages
-          "parent", // Relative parent
-          "sibling", // Relative sibling
-          "index", // Relative index
-        ],
-        "newlines-between": "never",
-        distinctGroup: false,
-      },
-    ],
+    // "import/order": [
+    //   "warn",
+    //   {
+    //     groups: [
+    //       "builtin", // Node.js built-in modules
+    //       "external", // Packages
+    //       "parent", // Relative parent
+    //       "sibling", // Relative sibling
+    //       "index", // Relative index
+    //     ],
+    //     "newlines-between": "never",
+    //     distinctGroup: false,
+    //   },
+    // ],
   },
 };

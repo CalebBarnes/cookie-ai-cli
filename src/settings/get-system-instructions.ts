@@ -1,9 +1,9 @@
-import { getFilesMessage } from "../commands/files.js";
-import { getSettings } from "./get-settings.js";
+import { getFilesMessage } from "../commands/files";
+import { getSettings } from "./get-settings";
 import {
   DEFAULT_SETTINGS_FILE_PATH,
   baseInstructions,
-} from "./settings-constants.js";
+} from "./settings-constants";
 
 export async function getSystemInstructions(
   filePath = DEFAULT_SETTINGS_FILE_PATH
@@ -23,7 +23,7 @@ export async function getSystemInstructions(
   ${filesMessageContent}
   `;
   } else {
-    instructions += `Current User watched files: None, use the files add command to add files to watch
+    instructions += `Current User watched files: None, use the "files add" command to add files to watch
   `;
   }
 

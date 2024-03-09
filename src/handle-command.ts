@@ -1,17 +1,18 @@
 import { spawn } from "node:child_process";
-import { sendChat } from "./send-chat.js";
-import { colors } from "./utils/colors.js";
-import { promptUser } from "./prompt-user.js";
-import { askQuestion } from "./ask-question.js";
+import { askQuestion } from "./ask-question";
+import { colors } from "./utils/colors";
+import { logger } from "./utils/debug-log";
 
 export async function handleCommand({
   command,
   values,
   description,
+  onProcClosedWithError,
 }: {
   command: string;
   values?: Record<string, string>;
   description?: string;
+  onProcClosedWithError?: (code: number | null, stderrOutput: string) => void;
 }): Promise<void> {
   let fullCommand = command;
   if (values) {
@@ -20,9 +21,9 @@ export async function handleCommand({
       return values[keyWithBraces] ?? `{${match}}`; // Replace with value or keep the placeholder if value is not found
     });
   }
-  console.log(`command: ${colors.red}${fullCommand}${colors.reset}`);
+  logger.log(`command: ${colors.red}${fullCommand}${colors.reset}`);
   if (description) {
-    console.log(`description: ${colors.yellow}${description}${colors.reset}`);
+    logger.log(`description: ${colors.yellow}${description}${colors.reset}`);
   }
 
   const answer = await askQuestion(
@@ -31,34 +32,34 @@ export async function handleCommand({
 
   switch (answer) {
     case "y": {
-      await spawnProcAndExecuteCommand(fullCommand);
+      await spawnProcAndExecuteCommand(fullCommand, onProcClosedWithError);
       return;
     }
 
     case "n": {
-      console.log("Command aborted.");
+      logger.log("Command aborted.");
       break;
     }
 
     case "r": {
-      await promptUser();
+      // const answer = await askQuestion("Revise command: ");
+      // await sendChat({ message: `Revise command: ${answer}` });
+      logger.log("Command aborted.");
       break;
     }
     default: {
-      console.log("Command aborted.");
+      logger.log("Command aborted.");
       break;
     }
   }
 }
 
 function spawnProcAndExecuteCommand(
-  command: string
+  command: string,
+  onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
 ): Promise<number | null | undefined> {
   return new Promise((resolve, reject) => {
-    console.log(
-      "Executing command: ",
-      `${colors.blue}${command}${colors.reset}`
-    );
+    logger.log(`Executing command: ${colors.blue}${command}${colors.reset}`);
 
     const [bin, ...args] = command.split(" ");
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- bin is not null
@@ -70,22 +71,22 @@ function spawnProcAndExecuteCommand(
 
     let stderrOutput = "";
     proc.stderr.on("data", (data: Buffer) => {
-      console.log(data.toString());
+      logger.log(data.toString());
       stderrOutput += data.toString();
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises -- close event is not a promise
     proc.on("close", (code) => {
       if (code !== 0) {
-        console.log(
+        logger.log(
           `${colors.red}Command exited with error code: ${code}${colors.reset}`
         );
-        return sendChat({
-          isError: true,
-          message: `Command exited with error code: ${code}\n${stderrOutput}`,
-        });
+        onProcClosedWithError?.(code, stderrOutput);
+        // return sendChat({
+        //   isError: true,
+        //   message: `Command exited with error code: ${code}\n${stderrOutput}`,
+        // });
       }
-      console.log(``);
+      logger.log(``, "");
       resolve(code);
     });
 

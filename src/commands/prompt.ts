@@ -1,6 +1,6 @@
 import { type Command } from "commander";
-import { promptUser } from "../prompt-user.js";
-import { sendChat } from "../send-chat.js";
+import { sendChat } from "../send-chat";
+import { askQuestion } from "../ask-question";
 
 export function registerPromptCommand(program: Command): void {
   program
@@ -10,7 +10,8 @@ export function registerPromptCommand(program: Command): void {
       const message = argv.join(" ");
 
       if (!message) {
-        await promptUser();
+        const answer = await askQuestion("What do you want to do?");
+        await sendChat({ message: answer });
       } else {
         await sendChat({ message });
       }

@@ -80,6 +80,5 @@ export function validateSettings(settings: unknown): Settings {
   if (!result.success) {
     throw new Error(result.error.issues.map((i) => i.message).join("\n"));
   }
-
   return result.data;
 }

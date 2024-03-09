@@ -1,7 +1,9 @@
-import { colors } from "./colors.js";
+import { colors } from "./colors";
+
+type Message = unknown;
 
 function debugLog(
-  message: string | Record<string, unknown>,
+  message: Message,
   level: "error" | "log" | "warn" | "info" = "log",
   overridePrefix?: string
 ): void {
@@ -34,28 +36,39 @@ function debugLog(
     }
   })();
 
-  console[level](
-    `${prefixColor}${prefix}${reset}${levelPrefix}${reset} ${messagePrefix}${
-      typeof message === "object"
-        ? `\n${JSON.stringify(message, null, 2)}`
-        : message
-    }${reset}`
-  );
+  let messageString;
+  if (typeof message === "string") {
+    messageString = message;
+  }
+  if (typeof message === "object" || Array.isArray(message)) {
+    messageString = JSON.stringify(message, null, 2);
+  }
+
+  if (
+    typeof messageString === "string" ||
+    typeof messageString === "number" ||
+    typeof messageString === "boolean"
+  ) {
+    // eslint-disable-next-line no-console -- We are logging to the console
+    console[level](
+      `${prefixColor}${prefix}${reset}${levelPrefix}${reset} ${messagePrefix}${messageString}${reset}`
+    );
+  }
 }
 
-const debug = {
-  log: (message: string, overridePrefix?: string) => {
+const logger = {
+  log: (message: Message, overridePrefix?: string) => {
     debugLog(message, "log", overridePrefix);
   },
-  error: (message: string, overridePrefix?: string) => {
+  error: (message: Message, overridePrefix?: string) => {
     debugLog(message, "error", overridePrefix);
   },
-  warn: (message: string, overridePrefix?: string) => {
+  warn: (message: Message, overridePrefix?: string) => {
     debugLog(message, "warn", overridePrefix);
   },
-  info: (message: string, overridePrefix?: string) => {
+  info: (message: Message, overridePrefix?: string) => {
     debugLog(message, "info", overridePrefix);
   },
 };
 
-export { debug };
+export { logger };

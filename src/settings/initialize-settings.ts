@@ -1,8 +1,8 @@
-import { askQuestion } from "../ask-question.js";
-import { debug } from "../utils/debug-log.js";
-import { saveSettings } from "./save-settings.js";
-import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
-import { type Settings, services } from "./settings-schema.js";
+import { askQuestion } from "../ask-question";
+import { logger } from "../utils/debug-log";
+import { saveSettings } from "./save-settings";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants";
+import { type Settings, services } from "./settings-schema";
 
 export async function initializeSettings(
   settingsPath = DEFAULT_SETTINGS_FILE_PATH
@@ -36,7 +36,7 @@ export async function initializeSettings(
   );
   settings.model = model || "gpt-4";
 
-  debug.info(
+  logger.info(
     `Saving settings at ${settingsPath}:\n${JSON.stringify(settings, null, 2)}}`
   );
 
@@ -44,8 +44,9 @@ export async function initializeSettings(
 }
 
 async function askForCustomHeaders(): Promise<Record<string, string>> {
-  console.log(
-    "Enter custom headers. Type 'done' as the header key when finished."
+  logger.log(
+    "Enter custom headers. Type 'done' as the header key when finished.",
+    ""
   );
   const headers = {} as Record<string, string>;
   let addingHeaders = true;

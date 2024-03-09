@@ -1,5 +1,6 @@
 import readline from "node:readline";
-import { colors } from "./utils/colors.js";
+import { colors } from "./utils/colors";
+import { logger } from "./utils/debug-log";
 
 export function askQuestion(
   query: string,
@@ -29,7 +30,7 @@ export function askQuestion(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We already checked that the choice is within the range
           resolve(options[choice - 1]!);
         } else {
-          console.log(
+          logger.log(
             `${colors.red}Invalid choice, please try again.${colors.reset}`
           );
           rl.close();

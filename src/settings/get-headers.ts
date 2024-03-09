@@ -1,4 +1,4 @@
-import { type Settings } from "./settings-schema.js";
+import { type Settings } from "./settings-schema";
 
 export function getHeaders(settings: Settings): Record<string, string> {
   const headers = {

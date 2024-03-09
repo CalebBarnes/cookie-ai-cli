@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type Command } from "commander";
-import { getSettings } from "../settings/get-settings.js";
-import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
-import { debug } from "../utils/debug-log.js";
-import { saveSettings } from "../settings/save-settings.js";
-import { colors } from "../utils/colors.js";
-import { writeToClipboard } from "../utils/write-to-clipboard.js";
-import { askQuestion } from "../ask-question.js";
+import { getSettings } from "../settings/get-settings";
+import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants";
+import { logger } from "../utils/debug-log";
+import { saveSettings } from "../settings/save-settings";
+import { colors } from "../utils/colors";
+import { writeToClipboard } from "../utils/write-to-clipboard";
+import { askQuestion } from "../ask-question";
 
 export async function getFilesMessage(
   settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
@@ -24,9 +24,9 @@ export async function getFilesMessage(
       } catch (err) {
         if (err instanceof Error) {
           if (err.message.includes("no such file or directory")) {
-            debug.error(`File not found: ${file}`);
+            logger.error(`File not found: ${file}`);
           } else {
-            debug.error(`Error reading file: ${file}`);
+            logger.error(`Error reading file: ${file}`);
           }
 
           const answer = await askQuestion(
@@ -56,7 +56,7 @@ export function addItem(
   filePath = DEFAULT_SETTINGS_FILE_PATH
 ): void {
   if (!files.length) {
-    debug.error("No files provided");
+    logger.error("No files provided");
     // todo: use readline interface to list files and select checkboxes with space (TUI?)
     return;
   }
@@ -68,11 +68,11 @@ export function addItem(
     const absolutePath = path.resolve(file);
 
     if (!exists) {
-      debug.error(`File or directory does not exist: ${absolutePath}`);
+      logger.error(`File or directory does not exist: ${absolutePath}`);
       return;
     }
     if (settings.files?.includes(absolutePath)) {
-      debug.error(`${absolutePath} is already in the list`);
+      logger.error(`${absolutePath} is already in the list`);
       return;
     }
     settings.files = settings.files
@@ -88,7 +88,7 @@ export function removeItem(
   filePath = DEFAULT_SETTINGS_FILE_PATH
 ): void {
   if (!files.length) {
-    debug.error("No files provided");
+    logger.error("No files provided");
     return;
   }
 
@@ -99,8 +99,8 @@ export function removeItem(
       settings.files = settings.files.filter((f) => f !== file);
       saveSettings(settings, filePath);
     } else {
-      debug.error(`${file} is not in the list:`);
-      console.log(settings.files);
+      logger.error(`${file} is not in the list:`);
+      logger.log(settings.files, "");
       return;
     }
   }
@@ -113,11 +113,12 @@ export function listFiles(filePath = DEFAULT_SETTINGS_FILE_PATH): void {
 
   if (settings.files?.length) {
     for (const file of settings.files) {
-      console.log(`${colors.green}• ${file}${colors.reset}`);
+      logger.log(`${colors.green}• ${file}${colors.reset}`, "");
     }
   } else {
-    console.log(
-      `${colors.yellow}No files added. You can use the "files add <filepath>" command to add files to the list.${colors.reset}`
+    logger.log(
+      `${colors.yellow}No files added. You can use the "files add <filepath>" command to add files to the list.${colors.reset}`,
+      ""
     );
   }
 }
@@ -154,8 +155,9 @@ export function registerFilesCommands(program: Command): void {
 
         case "copy":
           await copyFilesToClipboard();
-          console.log(
-            `${colors.green}files copied to clipboard:${colors.reset}`
+          logger.log(
+            `${colors.green}files copied to clipboard:${colors.reset}`,
+            ""
           );
           listFiles();
 

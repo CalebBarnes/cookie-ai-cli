@@ -1,12 +1,12 @@
-import { type Response } from "./ai-response-schema.js";
-import { getSettings } from "./settings/get-settings.js";
-import { handleAction } from "./handle-action.js";
-import { getHeaders } from "./settings/get-headers.js";
-import { options } from "./arg-options.js";
-import { debug } from "./utils/debug-log.js";
-import { colors } from "./utils/colors.js";
-import { baseInstructions } from "./settings/settings-constants.js";
-import { getSystemInstructions } from "./settings/get-system-instructions.js";
+import { type Response } from "./ai-response-schema";
+import { getSettings } from "./settings/get-settings";
+import { handleAction } from "./handle-action";
+import { getHeaders } from "./settings/get-headers";
+import { options } from "./arg-options";
+import { logger } from "./utils/debug-log";
+import { colors } from "./utils/colors";
+import { baseInstructions } from "./settings/settings-constants";
+import { getSystemInstructions } from "./settings/get-system-instructions";
 
 interface Payload {
   /**
@@ -77,7 +77,7 @@ export async function sendChat({
     content: !isError ? message : `error with last command: ${message}`,
   });
 
-  console.log(`${colors.yellow}🤔 AI thinking...${colors.reset}`);
+  logger.log(`${colors.yellow}🤔 AI thinking...${colors.reset}`, "");
 
   const endpoint =
     settings.service === "openai"
@@ -85,7 +85,7 @@ export async function sendChat({
       : settings.endpoint;
 
   if (!endpoint) {
-    debug.error(
+    logger.error(
       `Failed to resolve endpoint from settings: ${JSON.stringify(settings, null, 2)}`
     );
     process.exit(1);
@@ -97,21 +97,24 @@ export async function sendChat({
     body: JSON.stringify(payload),
   });
   if (!response.ok) {
-    debug.error(`Failed to send message to endpoint: ${endpoint}`);
+    logger.error(`Failed to send message to endpoint: ${endpoint}`);
     process.exit(1);
   }
 
-  console.log(`${colors.green}✅ AI responded!${colors.reset}`);
+  logger.log(`${colors.green}✅ AI responded!${colors.reset}`);
 
   let responseJson: ResponseJson;
   try {
     responseJson = (await response.json()) as ResponseJson;
     if (options.debug) {
-      console.log("responseJson", responseJson);
+      logger.log("responseJson");
+      logger.log(responseJson);
     }
-  } catch (err) {
-    debug.error("Failed to parse endpoint response as JSON");
-    console.error(err);
+  } catch (err: unknown) {
+    logger.error("Failed to parse endpoint response as JSON");
+    if (err instanceof Error) {
+      logger.error(err);
+    }
     process.exit(1);
   }
 
@@ -119,7 +122,7 @@ export async function sendChat({
   if (!aiResponseChatMessage) {
     switch (settings.service) {
       case "openai":
-        debug.error(
+        logger.error(
           `No message in response from the AI.
     Check that your OpenAI account does not have restricted usage limits at https://platform.openai.com/account/limits 
     and that you have enough credits to use the API.
@@ -129,7 +132,7 @@ export async function sendChat({
         );
         break;
       default:
-        debug.error(
+        logger.error(
           `No message in response from the AI. Check that your custom endpoint is working correctly.`
         );
     }
@@ -139,7 +142,8 @@ export async function sendChat({
   // add the AI response to the chat history
   payload.messages.push(aiResponseChatMessage);
   if (options.debug) {
-    console.log("payload", payload);
+    logger.log("payload:");
+    logger.log(payload);
   }
 
   const aiResponseContent = responseJson.choices[0]?.message?.content ?? "";
@@ -152,24 +156,24 @@ export async function sendChat({
   try {
     pamperedResponseData = JSON.parse(json) as Response;
     const actionResult = await handleAction({ result: pamperedResponseData });
-    console.log({ actionResult });
+    logger.log({ actionResult });
 
     if (actionResult.error?.code === "unsupported_action") {
-      // console.log(
+      // logger.log(
       //   `${colors.red}AI tried to use unsupported action "${result.action}", asking AI to retry: ${colors.reset}`,
       //   result.action
       // );
-      console.error(actionResult.error.message);
+      logger.error(actionResult.error.message);
       await sendChat({
         message: actionResult.error.message,
       });
     }
   } catch (error) {
-    debug.error("Failed to parse AI response as JSON");
-    debug.log("Asking AI to retry...");
+    logger.error("Failed to parse AI response as JSON");
+    logger.log("Asking AI to retry...");
     if (options.debug) {
-      console.log("AI Response: ");
-      console.log(aiResponseContent);
+      logger.log("AI Response: ");
+      logger.log(aiResponseContent);
     }
     await sendChat({
       isError: true,

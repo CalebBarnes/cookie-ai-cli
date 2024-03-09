@@ -3,7 +3,7 @@ import {
   type Response,
 } from "./ai-response-schema";
 import { askQuestion } from "./ask-question";
-import { handleCommand } from "./handle-command.js";
+import { handleCommand } from "./handle-command";
 
 export async function commandListAction({
   commands,

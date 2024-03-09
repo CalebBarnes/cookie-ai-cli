@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { logger } from "./debug-log";
 
 export function writeToClipboard(text: string): boolean {
   const platform = process.platform;
@@ -14,13 +15,16 @@ export function writeToClipboard(text: string): boolean {
       // Linux (Ensure xclip is installed)
       execSync(`xclip -selection clipboard`, { input: text });
     } else {
-      console.error("Platform not supported for clipboard operations");
+      logger.error("Platform not supported for clipboard operations");
       return false;
     }
 
     return true;
-  } catch (error) {
-    console.error("Failed to write to clipboard:", error);
+  } catch (error: unknown) {
+    logger.error("Failed to write to clipboard");
+    if (error instanceof Error) {
+      logger.error(error, "");
+    }
     return false;
   }
 }
