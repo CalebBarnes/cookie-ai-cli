@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { logger } from "./debug-log";
+import { logger } from "./debug-log.js";
 
 export function writeToClipboard(text: string): boolean {
   const platform = process.platform;

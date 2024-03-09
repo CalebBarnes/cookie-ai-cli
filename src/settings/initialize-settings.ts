@@ -1,8 +1,8 @@
-import { askQuestion } from "../ask-question";
-import { logger } from "../utils/debug-log";
-import { saveSettings } from "./save-settings";
-import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants";
-import { type Settings, services } from "./settings-schema";
+import { askQuestion } from "../ask-question.js";
+import { logger } from "../utils/debug-log.js";
+import { saveSettings } from "./save-settings.js";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
+import { type Settings, services } from "./settings-schema.js";
 
 export async function initializeSettings(
   settingsPath = DEFAULT_SETTINGS_FILE_PATH

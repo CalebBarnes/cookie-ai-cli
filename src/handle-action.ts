@@ -1,9 +1,9 @@
 import {
   type UserInfoRequiredMessageContent,
   type Response,
-} from "./ai-response-schema";
-import { askQuestion } from "./ask-question";
-import { handleCommand } from "./handle-command";
+} from "./ai-response-schema.js";
+import { askQuestion } from "./ask-question.js";
+import { handleCommand } from "./handle-command.js";
 
 export async function commandListAction({
   commands,

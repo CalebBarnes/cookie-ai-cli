@@ -1,5 +1,5 @@
 import { type Command } from "commander";
-import { initializeSettings } from "../settings/initialize-settings";
+import { initializeSettings } from "../settings/initialize-settings.js";
 
 export function registerInitCommand(program: Command): void {
   program

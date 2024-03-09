@@ -1,12 +1,12 @@
-import { type Response } from "./ai-response-schema";
-import { getSettings } from "./settings/get-settings";
-import { handleAction } from "./handle-action";
-import { getHeaders } from "./settings/get-headers";
-import { options } from "./arg-options";
-import { logger } from "./utils/debug-log";
-import { colors } from "./utils/colors";
-import { baseInstructions } from "./settings/settings-constants";
-import { getSystemInstructions } from "./settings/get-system-instructions";
+import { type Response } from "./ai-response-schema.js";
+import { getSettings } from "./settings/get-settings.js";
+import { handleAction } from "./handle-action.js";
+import { getHeaders } from "./settings/get-headers.js";
+import { options } from "./arg-options.js";
+import { logger } from "./utils/debug-log.js";
+import { colors } from "./utils/colors.js";
+import { baseInstructions } from "./settings/settings-constants.js";
+import { getSystemInstructions } from "./settings/get-system-instructions.js";
 
 interface Payload {
   /**

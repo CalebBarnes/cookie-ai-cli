@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { logger } from "../utils/debug-log";
-import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants";
-import { type Settings, validateSettings } from "./settings-schema";
+import { logger } from "../utils/debug-log.js";
+import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
+import { type Settings, validateSettings } from "./settings-schema.js";
 
 export function saveSettings(
   settings: Settings,
@@ -10,8 +10,8 @@ export function saveSettings(
 ): void {
   const validatedSettings = validateSettings(settings);
   try {
-    fs.mkdirSync(path.dirname(settingsPath), { recursive: true }); // Create directory if it doesn't exist
-    fs.writeFileSync(settingsPath, JSON.stringify(validatedSettings, null, 2)); // Write settings to file
+    fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+    fs.writeFileSync(settingsPath, JSON.stringify(validatedSettings, null, 2));
   } catch (err: unknown) {
     if (err instanceof Error) {
       logger.error(`Error saving settings file: ${err.message}`);

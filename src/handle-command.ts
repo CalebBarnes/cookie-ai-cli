@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
-import { askQuestion } from "./ask-question";
-import { colors } from "./utils/colors";
-import { logger } from "./utils/debug-log";
+import { askQuestion } from "./ask-question.js";
+import { colors } from "./utils/colors.js";
+import { logger } from "./utils/debug-log.js";
 
 export async function handleCommand({
   command,

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const services = ["openai", "custom"] as const;
-
 export const errors = {
   OPENAI_KEY_REQUIRED: "'openai.key' is required when using service 'openai'",
   ENDPOINT_REQUIRED: "'endpoint' is required when using service 'custom'",

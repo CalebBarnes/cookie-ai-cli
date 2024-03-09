@@ -16,8 +16,8 @@
     "build": "tsc && pnpm run copy-ts-file",
     "copy-ts-file": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w",
-    "start": "node --no-warnings=ExperimentalWarning --es-module-specifier-resolution=node ./dist/index",
-    "start:ip": "node --no-warnings=ExperimentalWarning ./dist/index.js what is my ip",
+    "start": "node --no-warnings=ExperimentalWarning ./dist/index",
+    "start:ip": "pnpm start what is my ip",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --ext .ts"

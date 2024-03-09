@@ -1,9 +1,9 @@
-import { getFilesMessage } from "../commands/files";
-import { getSettings } from "./get-settings";
+import { getFilesMessage } from "../commands/files.js";
+import { getSettings } from "./get-settings.js";
 import {
   DEFAULT_SETTINGS_FILE_PATH,
   baseInstructions,
-} from "./settings-constants";
+} from "./settings-constants.js";
 
 export async function getSystemInstructions(
   filePath = DEFAULT_SETTINGS_FILE_PATH

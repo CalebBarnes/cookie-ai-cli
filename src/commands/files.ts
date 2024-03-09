@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type Command } from "commander";
-import { getSettings } from "../settings/get-settings";
-import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants";
-import { logger } from "../utils/debug-log";
-import { saveSettings } from "../settings/save-settings";
-import { colors } from "../utils/colors";
-import { writeToClipboard } from "../utils/write-to-clipboard";
-import { askQuestion } from "../ask-question";
+import { getSettings } from "../settings/get-settings.js";
+import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
+import { logger } from "../utils/debug-log.js";
+import { saveSettings } from "../settings/save-settings.js";
+import { colors } from "../utils/colors.js";
+import { writeToClipboard } from "../utils/write-to-clipboard.js";
+import { askQuestion } from "../ask-question.js";
 
 export async function getFilesMessage(
   settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
