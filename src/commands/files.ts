@@ -34,7 +34,7 @@ export async function getFilesMessage(
             "Remove this file from the list? (y/n)"
           );
           if (answer === "y") {
-            removeItem([file]);
+            await removeItem([file]);
           }
         }
         continue;
@@ -157,7 +157,7 @@ export function listFiles(filePath = DEFAULT_SETTINGS_FILE_PATH): void {
 
   if (settings.files?.length) {
     for (const file of settings.files) {
-      logger.info(`${colors.green}• ${file}${colors.reset}`);
+      console.log(`${colors.green}• ${file}${colors.reset}`);
     }
   } else {
     logger.info(
