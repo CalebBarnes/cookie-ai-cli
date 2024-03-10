@@ -14,8 +14,7 @@
   "author": "Caleb Barnes <https://github.com/CalebBarnes>",
   "license": "MIT",
   "scripts": {
-    "build": "node esbuild.config.mjs && pnpm copy-ts-file",
-    "build:tsc": "tsc && pnpm run copy-ts-file",
+    "build": "node esbuild.config.mjs",
     "copy-ts-file": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w",
     "start": "node ./dist/index",
