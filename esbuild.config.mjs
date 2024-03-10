@@ -9,6 +9,7 @@ try {
   process.exit(1);
 }
 
+console.log("🚀 Build starting... 🔥");
 await esbuild
   .build({
     entryPoints: ["src/index.ts"],
