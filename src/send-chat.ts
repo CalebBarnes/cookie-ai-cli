@@ -168,6 +168,11 @@ export async function sendChat({
   try {
     pamperedResponseData = JSON.parse(json) as Response;
     const actionResult = await handleAction({ result: pamperedResponseData });
+    if (actionResult.filesLoaded) {
+      await sendChat({
+        message: "Files loaded",
+      });
+    }
     if (actionResult.success) {
       const nextMessage = await askQuestion("➜");
       console.log({ nextMessage });

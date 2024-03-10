@@ -9,6 +9,7 @@ import { logger } from "./utils/logger.js";
 
 export async function handleAction({ result }: { result: Response }): Promise<{
   success: boolean;
+  filesLoaded?: boolean;
   error?: {
     code: string;
     message: string;
@@ -37,7 +38,7 @@ export async function handleAction({ result }: { result: Response }): Promise<{
 
     case "request_file_access": {
       await requestFileAccessAction(result);
-      return { success: true };
+      return { success: true, filesLoaded: true };
     }
 
     default: {
@@ -67,7 +68,7 @@ export async function requestFileAccessAction({
     );
     if (answer === "y") {
       logger.info(`Access granted to ${file}`);
-      addItem([file]);
+      await addItem([file]);
     }
   }
 }
