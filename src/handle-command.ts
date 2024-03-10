@@ -28,7 +28,7 @@ export async function handleCommand({
   }
 
   const answer = await askQuestion(
-    `Run this command? (y/n/r) ${colors.darkGrey} (y: yes, n: no, r: revise command)${colors.reset}`
+    `Run this command? (y/n) ${colors.darkGrey} (y: yes, n: no)${colors.reset}`
   );
 
   switch (answer) {
@@ -38,13 +38,10 @@ export async function handleCommand({
     }
 
     case "n": {
-      logger.info("Command aborted.");
+      logger.debug(`Skipped command "${fullCommand}"`);
       break;
     }
 
-    case "r": {
-      break;
-    }
     default: {
       logger.info("Command aborted.");
       break;
@@ -60,7 +57,7 @@ function spawnProcAndExecuteCommand(
     logger.info(`Executing command: ${colors.blue}${command}${colors.reset}`);
 
     const [bin, ...args] = command.split(" ");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- bin is not null
+
     const proc = spawn(bin!, args, {
       stdio: ["inherit", "inherit", "pipe"],
       shell: true,

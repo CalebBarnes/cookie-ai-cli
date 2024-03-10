@@ -1,6 +1,6 @@
-#!/usr/bin/env node --no-warnings=ExperimentalWarning
+#!/usr/bin/env node
 import { Command } from "commander";
-import packageJson from "../package.json" assert { type: "json" };
+import packageJson from "../package.json";
 import { registerInitCommand } from "./commands/init.js";
 import { registerPromptCommand } from "./commands/prompt.js";
 import { registerFilesCommands } from "./commands/files.js";
