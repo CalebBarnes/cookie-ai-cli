@@ -175,7 +175,6 @@ export async function sendChat({
     }
     if (actionResult.success) {
       const nextMessage = await askQuestion("➜");
-      console.log({ nextMessage });
       await sendChat({
         message: nextMessage,
       });

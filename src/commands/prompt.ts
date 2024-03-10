@@ -15,7 +15,6 @@ async function handlePromptCommand(argv: string[]): Promise<void> {
 
   if (!message) {
     const answer = await askQuestion("➜");
-    console.log({ answer });
 
     if (answer.startsWith("files")) {
       const [_command, operation, ...files] = answer.split(" ");
