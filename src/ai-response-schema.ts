@@ -58,6 +58,17 @@ export interface UserInfoRequiredMessageContent {
   description: string;
 }
 
+export interface RequestFileAccessMessageContent {
+  /**
+   * The action to take when you need to request file access from the user to gain additional context when suggesting a command.
+   */
+  action: "request_file_access";
+  /**
+   * The list of files to request access to
+   */
+  files: string[];
+}
+
 export interface MessageToUserContent {
   /**
    * The action to take when there is no command to run, but you just need to display a message to the user instead.
@@ -75,4 +86,5 @@ export type Response =
   | CommandMessageContent
   | CommandListMessageContent
   | UserInfoRequiredMessageContent
-  | MessageToUserContent;
+  | MessageToUserContent
+  | RequestFileAccessMessageContent;

@@ -24,5 +24,7 @@ module.exports = {
   },
   rules: {
     "tsdoc/syntax": "off",
+    "no-console": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
   },
 };

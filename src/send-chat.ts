@@ -1,13 +1,14 @@
+import ora from "ora";
 import { type Response } from "./ai-response-schema.js";
 import { getSettings } from "./settings/get-settings.js";
 import { handleAction } from "./handle-action.js";
 import { getHeaders } from "./settings/get-headers.js";
-import { options } from "./arg-options.js";
-import { logger } from "./utils/debug-log.js";
+import { logger } from "./utils/logger.js";
 import { colors } from "./utils/colors.js";
 import { baseInstructions } from "./settings/settings-constants.js";
 import { getSystemInstructions } from "./settings/get-system-instructions.js";
 import { askQuestion } from "./ask-question.js";
+import { type Settings } from "./settings/settings-schema.js";
 
 interface Payload {
   /**
@@ -24,20 +25,7 @@ interface Payload {
    *
    */
   temperature: number;
-  /**
-   *
-   * Don't use mode if you're using OpenAI's API
-   * For text-generation-webui, valid options are "instruct", "chat", "chat-instruct" and it defaults to "instruct".
-   */
-  mode?: string;
-  /**
-   * Don't use instruction_template if you're using OpenAI's API
-   * An instruction template defined under text-generation-webui/instruction-templates.
-   * If not set, the correct template will be guessed using the regex expressions in models/config.yaml.
-   */
-  instruction_template?: string;
 }
-
 interface Choice {
   message: { role: string; content: string };
 }
@@ -58,16 +46,23 @@ export async function sendChat({
   message: string;
   isError?: boolean;
 }): Promise<Response | undefined> {
+  logger.debug("sendChat");
+  logger.debug(message);
+  logger.debug({ isError });
+
   if (payload.messages[0]) {
-    payload.messages[0].content = await getSystemInstructions();
+    const systemInstructions = await getSystemInstructions();
+    logger.debug("systemInstructions");
+    logger.debug(systemInstructions);
+    payload.messages[0].content = systemInstructions;
   }
 
   const settings = getSettings();
   if (settings.service === "custom" && settings.custom?.payload) {
     Object.assign(payload, settings.custom.payload);
   }
-  if (settings.model) {
-    payload.model = settings.model;
+  if (settings.openai?.model) {
+    payload.model = settings.openai.model;
   }
 
   payload.messages.push({
@@ -75,17 +70,30 @@ export async function sendChat({
     content: !isError ? message : `error with last command: ${message}`,
   });
 
-  logger.log(`${colors.yellow}🤔 AI thinking...${colors.reset}`, "");
-
-  const endpoint =
-    settings.service === "openai"
-      ? "https://api.openai.com/v1/chat/completions"
-      : settings.endpoint;
+  const endpoint = getEndpoint(settings);
   if (!endpoint) {
     logger.error(
       `Failed to resolve endpoint from settings: ${JSON.stringify(settings, null, 2)}`
     );
-    process.exit(1);
+    return;
+    // process.exit(1);
+  }
+
+  logger.debug("payload");
+  logger.debug(payload);
+
+  const spinner = ora({
+    spinner: {
+      interval: 200,
+      frames: ["▱▱▱▱▱", "▰▱▱▱▱", "▰▰▱▱▱", "▰▰▰▱▱", "▰▰▰▰▱", "▰▰▰▰▰"],
+    },
+    prefixText: `${colors.cyan}ℹ ${colors.reset}${message}`,
+  });
+
+  if (!isError) {
+    // process.stdout.moveCursor(0, -1);
+    // process.stdout.clearLine(1);
+    spinner.start();
   }
 
   const response = await fetch(endpoint, {
@@ -93,26 +101,36 @@ export async function sendChat({
     headers: getHeaders(settings),
     body: JSON.stringify(payload),
   });
+
   if (!response.ok) {
     logger.error(`Failed to send message to endpoint: ${endpoint}`);
-    process.exit(1);
-  }
+    if (!isError) {
+      spinner.fail();
+    }
+    logger.error(`Payload: ${JSON.stringify(payload, null, 2)}`);
+    logger.error(`Response status: ${response.status}`);
+    logger.error(`Response status text: ${response.statusText}`);
+    logger.error(await response.text());
 
-  logger.log(`${colors.green}✅ AI responded!${colors.reset}`, "");
+    return;
+    // process.exit(1);
+  }
+  if (!isError) {
+    spinner.succeed();
+  }
 
   let responseJson: ResponseJson;
   try {
     responseJson = (await response.json()) as ResponseJson;
-    if (options.debug) {
-      logger.log("responseJson");
-      logger.log(responseJson);
-    }
+    logger.debug("responseJson");
+    logger.debug(responseJson);
   } catch (err: unknown) {
     logger.error("Failed to parse endpoint response as JSON");
     if (err instanceof Error) {
       logger.error(err);
     }
-    process.exit(1);
+    return;
+    // process.exit(1);
   }
 
   const aiResponseChatMessage = responseJson.choices[0]?.message;
@@ -137,10 +155,8 @@ export async function sendChat({
   }
 
   payload.messages.push(aiResponseChatMessage);
-  if (options.debug) {
-    logger.log("payload:");
-    logger.log(payload);
-  }
+  logger.debug("payload:");
+  logger.debug(payload);
 
   const aiResponseContent = responseJson.choices[0]?.message?.content ?? "";
   let pamperedResponseData;
@@ -154,6 +170,7 @@ export async function sendChat({
     const actionResult = await handleAction({ result: pamperedResponseData });
     if (actionResult.success) {
       const nextMessage = await askQuestion("➜");
+      console.log({ nextMessage });
       await sendChat({
         message: nextMessage,
       });
@@ -169,17 +186,19 @@ export async function sendChat({
         unsupportedAction
       );
 
+      logger.error("AI tried to use unsupported action");
+      logger.error(`actionResult.error.message: ${actionResult.error.message}`);
+
       await sendChat({
         message: actionResult.error.message,
       });
     }
   } catch (error) {
     logger.error("Failed to parse AI response as JSON");
-    logger.log("Asking AI to retry...");
-    if (options.debug) {
-      logger.log("AI Response: ");
-      logger.log(aiResponseContent);
-    }
+    logger.info("Asking AI to retry...");
+    logger.debug(`AI Response:
+${aiResponseContent}`);
+
     await sendChat({
       isError: true,
       message: "Your last response was not valid JSON. Please try again.",
@@ -187,4 +206,12 @@ export async function sendChat({
   }
 
   return pamperedResponseData;
+}
+
+function getEndpoint(settings: Settings): string {
+  if (settings.service === "openai") {
+    return "https://api.openai.com/v1/chat/completions";
+  }
+
+  return settings.custom?.endpoint ?? "";
 }

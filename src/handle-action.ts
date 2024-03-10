@@ -3,8 +3,9 @@ import {
   type Response,
 } from "./ai-response-schema.js";
 import { askQuestion } from "./ask-question.js";
+import { addItem } from "./commands/files.js";
 import { handleCommand } from "./handle-command.js";
-import { logger } from "./utils/debug-log.js";
+import { logger } from "./utils/logger.js";
 
 export async function handleAction({ result }: { result: Response }): Promise<{
   success: boolean;
@@ -30,7 +31,12 @@ export async function handleAction({ result }: { result: Response }): Promise<{
     }
 
     case "message_to_user": {
-      logger.log(result.message);
+      logger.info(result.message);
+      return { success: true };
+    }
+
+    case "request_file_access": {
+      await requestFileAccessAction(result);
       return { success: true };
     }
 
@@ -45,6 +51,23 @@ export async function handleAction({ result }: { result: Response }): Promise<{
           message: `${unknownResult.action ? `${unknownResult.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
         },
       };
+    }
+  }
+}
+
+export async function requestFileAccessAction({
+  files,
+}: {
+  files: string[];
+}): Promise<void> {
+  logger.info(`AI Requesting access to file(s)`);
+  for (const file of files) {
+    const answer = await askQuestion(
+      `Do you want to allow access to ${file}? (y/n)`
+    );
+    if (answer === "y") {
+      logger.info(`Access granted to ${file}`);
+      addItem([file]);
     }
   }
 }

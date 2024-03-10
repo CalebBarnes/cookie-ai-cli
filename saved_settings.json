@@ -1,0 +1,14 @@
+{
+  "service": "openai",
+  "model": "gpt-4",
+  "openai": {
+    "key": "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"
+  },
+  "files": [
+    "/Users/caleb/cookie-work/ai-cli/package.json",
+    "/Users/caleb/cookie-work/ai-cli/src/ask-question.ts",
+    "/Users/caleb/cookie-work/ai-cli/src/ai-response-schema.ts",
+    "/Users/caleb/cookie-work/ai-cli/tsconfig.json",
+    "/Users/caleb/cookie-work/ai-cli/src/send-chat.ts"
+  ]
+}

@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { askQuestion } from "./ask-question.js";
 import { colors } from "./utils/colors.js";
-import { logger } from "./utils/debug-log.js";
+import { logger } from "./utils/logger.js";
 
 export async function handleCommand({
   command,
@@ -17,20 +17,18 @@ export async function handleCommand({
   let fullCommand = command;
   if (values) {
     fullCommand = command.replaceAll(/{(?<temp1>\w+)}/g, (_, match) => {
-      const keyWithBraces = `{${match}}`; // Construct the key with curly braces
-      return values[keyWithBraces] ?? `{${match}}`; // Replace with value or keep the placeholder if value is not found
+      const keyWithBraces = `{${match}}`;
+      return values[keyWithBraces] ?? `{${match}}`;
     });
   }
-  logger.log(`command: ${colors.red}${fullCommand}${colors.reset}`, "");
+
+  console.log(`command: ${colors.red}${fullCommand}${colors.reset}`, "");
   if (description) {
-    logger.log(
-      `description: ${colors.yellow}${description}${colors.reset}`,
-      ""
-    );
+    console.log(`description: ${colors.yellow}${description}${colors.reset}`);
   }
 
   const answer = await askQuestion(
-    `Run this command? (y/n/r) ${colors.darkGrey} (y: yes, n: no, r: revise command)`
+    `Run this command? (y/n/r) ${colors.darkGrey} (y: yes, n: no, r: revise command)${colors.reset}`
   );
 
   switch (answer) {
@@ -40,7 +38,7 @@ export async function handleCommand({
     }
 
     case "n": {
-      logger.log("Command aborted.");
+      logger.info("Command aborted.");
       break;
     }
 
@@ -48,7 +46,7 @@ export async function handleCommand({
       break;
     }
     default: {
-      logger.log("Command aborted.");
+      logger.info("Command aborted.");
       break;
     }
   }
@@ -59,7 +57,7 @@ function spawnProcAndExecuteCommand(
   onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
 ): Promise<number | null | undefined> {
   return new Promise((resolve, reject) => {
-    logger.log(`Executing command: ${colors.blue}${command}${colors.reset}`);
+    logger.info(`Executing command: ${colors.blue}${command}${colors.reset}`);
 
     const [bin, ...args] = command.split(" ");
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- bin is not null
@@ -71,22 +69,25 @@ function spawnProcAndExecuteCommand(
 
     let stderrOutput = "";
     proc.stderr.on("data", (data: Buffer) => {
-      logger.log(data.toString());
+      console.log("data.toString()", data.toString());
       stderrOutput += data.toString();
     });
 
     proc.on("close", (code) => {
       if (code !== 0) {
-        logger.log(
-          `${colors.red}Command exited with error code: ${code}${colors.reset}`
-        );
+        logger.error(`Command exited with error code: ${code}`);
         onProcClosedWithError?.(code, stderrOutput);
+        logger.info(
+          "TODO: handle prompting AI X amount of times in a row if the error exits with non zero code"
+        );
+        // todo: handle prompting AI X amount of times in a row if the error exits with non zero code
         // return sendChat({
         //   isError: true,
         //   message: `Command exited with error code: ${code}\n${stderrOutput}`,
         // });
       }
-      logger.log(``, "");
+
+      console.log("");
       resolve(code);
     });
 

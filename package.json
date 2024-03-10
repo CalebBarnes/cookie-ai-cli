@@ -17,6 +17,8 @@
     "copy-ts-file": "cp src/ai-response-schema.ts dist/",
     "build:watch": "tsc -w",
     "start": "node --no-warnings=ExperimentalWarning ./dist/index",
+    "start:help": "node --no-warnings=ExperimentalWarning ./dist/index files --help",
+    "start:version": "node --no-warnings=ExperimentalWarning ./dist/index --version",
     "start:debug": "node --no-warnings=ExperimentalWarning ./dist/index --debug",
     "start:ip": "pnpm start what is my ip",
     "test": "vitest",
@@ -26,9 +28,14 @@
   "dependencies": {
     "commander": "^12.0.0",
     "dotenv": "^16.4.5",
+    "inquirer": "^9.2.15",
+    "logform": "^2.6.0",
+    "ora": "^8.0.1",
+    "winston": "^3.12.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.7",
     "@types/node": "^20.11.24",
     "@vercel/style-guide": "^6.0.0",
     "@vitest/ui": "^1.3.1",

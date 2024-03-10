@@ -8,8 +8,8 @@ export function getHeaders(settings: Settings): Record<string, string> {
   if (settings.service === "openai") {
     headers.Authorization = `Bearer ${settings.openai?.key}`;
   }
-  if (settings.headers) {
-    Object.assign(headers, settings.headers);
+  if (settings.custom?.headers) {
+    Object.assign(headers, settings.custom.headers);
   }
   return headers;
 }

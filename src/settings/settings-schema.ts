@@ -3,45 +3,35 @@ import { z } from "zod";
 export const services = ["openai", "custom"] as const;
 export const errors = {
   OPENAI_KEY_REQUIRED: "'openai.key' is required when using service 'openai'",
-  ENDPOINT_REQUIRED: "'endpoint' is required when using service 'custom'",
-  MODEL_REQUIRED: "'model' is required. (example: 'gpt-4')",
+  MODEL_REQUIRED: "'openai.model' is required . (example: 'gpt-4')",
+  ENDPOINT_REQUIRED:
+    "'custom.endpoint' is required when using service 'custom'",
 };
 
 export const settingsSchema = z
   .object({
-    service: z.enum(["custom", "openai"]),
-    /**
-     * Model to be used for requests
-     */
-    model: z.string({
-      required_error: errors.MODEL_REQUIRED,
-    }),
-    /**
-     * OpenAI API key to be used for requests, when using service 'openai'
-     */
+    service: z.enum(["openai", "custom"]),
+
     openai: z
       .object({
         key: z.string({
           required_error: errors.OPENAI_KEY_REQUIRED,
         }),
+        model: z.string({
+          required_error: errors.MODEL_REQUIRED,
+        }),
+        temperature: z.string().optional(),
       })
       .optional(),
-    /**
-     * Custom payload to be sent with the request, when using service 'custom'
-     */
+
     custom: z
       .object({
+        endpoint: z.string().url(),
+        headers: z.record(z.string()).optional(),
         payload: z.record(z.string()).optional(),
       })
       .optional(),
-    /**
-     * Custom endpoint to send the request to (only used when service is 'custom')
-     */
-    endpoint: z.string().url().optional(),
-    /**
-     * Additional headers to be sent with the request
-     */
-    headers: z.record(z.string()).optional(),
+
     /**
      * List of files whose contents will be provided as context to the model
      */
@@ -61,7 +51,7 @@ export const settingsSchema = z
   )
   .refine(
     (data) => {
-      if (data.service === "custom" && !data.endpoint) {
+      if (data.service === "custom" && !data.custom?.endpoint) {
         return false;
       }
       return true;

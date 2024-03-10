@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { logger } from "./debug-log.js";
+import { logger } from "./logger.js";
 
 export function writeToClipboard(text: string): boolean {
   const platform = process.platform;
@@ -23,7 +23,7 @@ export function writeToClipboard(text: string): boolean {
   } catch (error: unknown) {
     logger.error("Failed to write to clipboard");
     if (error instanceof Error) {
-      logger.error(error, "");
+      logger.error(error);
     }
     return false;
   }

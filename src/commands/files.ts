@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type Command } from "commander";
+import inquirer from "inquirer";
 import { getSettings } from "../settings/get-settings.js";
 import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
-import { logger } from "../utils/debug-log.js";
+import { logger } from "../utils/logger.js";
 import { saveSettings } from "../settings/save-settings.js";
 import { colors } from "../utils/colors.js";
 import { writeToClipboard } from "../utils/write-to-clipboard.js";
@@ -51,21 +52,51 @@ ${fileContents}
   return contents;
 }
 
-export function addItem(
+export async function addItem(
   files: string[],
   filePath = DEFAULT_SETTINGS_FILE_PATH
-): void {
+): Promise<void> {
+  const settings = getSettings(filePath);
   if (!files.length) {
-    logger.error("No files provided");
-    // todo: use readline interface to list files and select checkboxes with space (TUI?)
+    const availableFiles = fs
+      .readdirSync(process.cwd())
+      .filter((file) => !settings.files?.includes(file));
+
+    const answers = (await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "files",
+        message: "Select files to add",
+        choices: availableFiles,
+      },
+    ])) as { files: string[] };
+
+    for (const file of answers.files) {
+      await addItem([file]);
+    }
     return;
   }
-
-  const settings = getSettings(filePath);
 
   for (const file of files) {
     const exists = fs.existsSync(file);
     const absolutePath = path.resolve(file);
+    const isDir = fs.lstatSync(file).isDirectory();
+    if (isDir) {
+      const filesInDir = fs.readdirSync(file);
+      const answers = (await inquirer.prompt([
+        {
+          type: "checkbox",
+          name: "files",
+          message: `Select files to add from "${file}" directory.:`,
+          choices: filesInDir,
+        },
+      ])) as { files: string[] };
+
+      for (const fileInDir of answers.files) {
+        await addItem([path.join(file, fileInDir)]);
+      }
+      return;
+    }
 
     if (!exists) {
       logger.error(`File or directory does not exist: ${absolutePath}`);
@@ -83,24 +114,37 @@ export function addItem(
   saveSettings(settings, filePath);
 }
 
-export function removeItem(
+export async function removeItem(
   files: string[],
   filePath = DEFAULT_SETTINGS_FILE_PATH
-): void {
+): Promise<void> {
+  const settings = getSettings(filePath);
   if (!files.length) {
-    logger.error("No files provided");
+    if (!settings.files?.length) {
+      logger.error("No files to remove");
+      return;
+    }
+    const answers = (await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "files",
+        message: "Select files to remove",
+        choices: settings.files ?? [],
+      },
+    ])) as { files: string[] };
+    for (const file of answers.files) {
+      await removeItem([file]);
+    }
     return;
   }
-
-  const settings = getSettings(filePath);
 
   for (const file of files) {
     if (settings.files?.includes(file)) {
       settings.files = settings.files.filter((f) => f !== file);
       saveSettings(settings, filePath);
     } else {
-      logger.error(`${file} is not in the list:`);
-      logger.log(settings.files, "");
+      logger.error(`${file} is not in the list:
+      ${settings.files?.join("\n")}`);
       return;
     }
   }
@@ -113,12 +157,11 @@ export function listFiles(filePath = DEFAULT_SETTINGS_FILE_PATH): void {
 
   if (settings.files?.length) {
     for (const file of settings.files) {
-      logger.log(`${colors.green}• ${file}${colors.reset}`, "");
+      logger.info(`${colors.green}• ${file}${colors.reset}`);
     }
   } else {
-    logger.log(
-      `${colors.yellow}No files added. You can use the "files add <filepath>" command to add files to the list.${colors.reset}`,
-      ""
+    logger.info(
+      `${colors.yellow}No files added. You can use the "files add" command to add files to the list.${colors.reset}`
     );
   }
 }
@@ -128,40 +171,50 @@ async function copyFilesToClipboard(): Promise<void> {
   writeToClipboard(text);
 }
 
-type Operation = "add" | "remove" | "reset" | "list" | "copy";
+export type Operation = "add" | "remove" | "reset" | "list" | "copy";
+
+export async function handleFilesCommand(
+  // eslint-disable-next-line @typescript-eslint/default-param-last -- doesn't matter for commander function
+  operation: Operation = "list",
+  files: string[]
+): Promise<void> {
+  const settings = getSettings();
+
+  switch (operation) {
+    case "add":
+      await addItem(files);
+      break;
+    case "remove":
+      await removeItem(files);
+      break;
+    case "reset":
+      settings.files = [];
+      saveSettings(settings);
+      break;
+    case "list":
+      listFiles();
+      break;
+    case "copy":
+      await copyFilesToClipboard();
+      logger.info(`${colors.green}files copied to clipboard:${colors.reset}`);
+      listFiles();
+
+      process.exit(0);
+  }
+}
 
 export function registerFilesCommands(program: Command): void {
   program
     .command("files [operation] [path...]")
     .description("Manage files")
-    // eslint-disable-next-line @typescript-eslint/default-param-last -- list has no files anyways
-    .action(async (operation: Operation = "list", files: string[]) => {
-      const settings = getSettings();
-
-      switch (operation) {
-        case "add":
-          addItem(files);
-          break;
-        case "remove":
-          removeItem(files);
-          break;
-        case "reset":
-          settings.files = [];
-          saveSettings(settings);
-          break;
-        case "list":
-          listFiles();
-          break;
-
-        case "copy":
-          await copyFilesToClipboard();
-          logger.log(
-            `${colors.green}files copied to clipboard:${colors.reset}`,
-            ""
-          );
-          listFiles();
-
-          process.exit(0);
-      }
+    .action(handleFilesCommand)
+    .on("--help", () => {
+      console.log("Examples:");
+      console.log(`   "ai files add"`);
+      console.log(`   "ai files add ./path/to/file"`);
+      console.log(`   "ai files remove"`);
+      console.log(`   "ai files reset"`);
+      console.log(`   "ai files list"`);
+      console.log(`   "ai files copy" ~ copies files to clipboard`);
     });
 }

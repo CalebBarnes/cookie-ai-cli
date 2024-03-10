@@ -30,7 +30,7 @@ describe("files", () => {
     listFiles(TEST_SETTINGS_PATH);
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringMatching(
-        /No files added. You can use the "files add <filepath>" command to add files to the list./
+        /No files added. You can use the "files add" command to add files to the list./
       )
     );
 

@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { logger } from "../utils/debug-log.js";
+import { logger } from "../utils/logger.js";
 import { options } from "../arg-options.js";
 import { colors } from "../utils/colors.js";
 import { type Settings, validateSettings } from "./settings-schema.js";
