@@ -1,13 +1,5 @@
 import fs from "node:fs";
-import {
-  describe,
-  it,
-  expect,
-  afterEach,
-  beforeEach,
-  vi,
-  afterAll,
-} from "vitest";
+import { describe, it, expect, afterEach, vi, afterAll } from "vitest";
 import { saveSettings } from "../src/settings/save-settings";
 import { errors } from "../src/settings/settings-schema";
 import { getSettings } from "../src/settings/get-settings";
