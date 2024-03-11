@@ -26,7 +26,11 @@ export const settingsSchema = z
 
     custom: z
       .object({
-        endpoint: z.string().url(),
+        endpoint: z
+          .string({
+            required_error: errors.ENDPOINT_REQUIRED,
+          })
+          .url(),
         headers: z.record(z.string()).optional(),
         payload: z.record(z.string()).optional(),
       })
