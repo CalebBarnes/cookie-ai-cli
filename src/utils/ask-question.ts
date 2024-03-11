@@ -1,6 +1,6 @@
 import readline from "node:readline";
-import { colors } from "./utils/colors.js";
-import { logger } from "./utils/logger.js";
+import { colors } from "./colors.js";
+import { logger } from "./logger.js";
 
 export function askQuestion(
   query: string,

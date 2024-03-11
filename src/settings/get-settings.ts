@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import { logger } from "../utils/logger.js";
-import { options } from "../arg-options.js";
 import { colors } from "../utils/colors.js";
 import { type Settings, validateSettings } from "./settings-schema.js";
 import { DEFAULT_SETTINGS_FILE_PATH } from "./settings-constants.js";
@@ -19,8 +18,7 @@ Run "ai init" to create a new settings file.`);
     settingsFileContents = fs.readFileSync(filePath, "utf8");
   } catch (error: unknown) {
     if (error instanceof Error) {
-      options.debug &&
-        logger.error("Error reading settings file", error.message);
+      logger.error("Error reading settings file", error.message);
     }
   }
 

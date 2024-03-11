@@ -1,6 +1,6 @@
 import { type Command } from "commander";
-import { sendChat } from "../send-chat.js";
-import { askQuestion } from "../ask-question.js";
+import { sendChat } from "../ai/send-chat.js";
+import { askQuestion } from "../utils/ask-question.js";
 import { type Operation, handleFilesCommand } from "./files.js";
 
 export function registerPromptCommand(program: Command): void {

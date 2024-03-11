@@ -1,19 +1,20 @@
 import { spawn } from "node:child_process";
-import { askQuestion } from "./ask-question.js";
+import { askQuestion } from "./utils/ask-question.js";
 import { colors } from "./utils/colors.js";
 import { logger } from "./utils/logger.js";
 
-export async function handleCommand({
-  command,
-  values,
-  description,
-  onProcClosedWithError,
-}: {
+interface Result {
   command: string;
   values?: Record<string, string>;
   description?: string;
-  onProcClosedWithError?: (code: number | null, stderrOutput: string) => void;
-}): Promise<void> {
+}
+
+export async function handleCommand(
+  result: Result,
+  onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
+): Promise<void> {
+  const { command, values, description } = result;
+
   let fullCommand = command;
   if (values) {
     fullCommand = command.replaceAll(/{(?<temp1>\w+)}/g, (_, match) => {
@@ -66,18 +67,22 @@ function spawnProcAndExecuteCommand(
 
     let stderrOutput = "";
     proc.stderr.on("data", (data: Buffer) => {
-      console.log("data.toString()", data.toString());
-      stderrOutput += data.toString();
+      try {
+        console.log(data.toString());
+        stderrOutput += data.toString();
+      } catch (err: unknown) {
+        console.log("err reading proc stderr", err);
+      }
     });
 
     proc.on("close", (code) => {
       if (code !== 0) {
-        logger.error(`Command exited with error code: ${code}`);
-        onProcClosedWithError?.(code, stderrOutput);
         logger.info(
           "TODO: handle prompting AI X amount of times in a row if the error exits with non zero code"
         );
-        // todo: handle prompting AI X amount of times in a row if the error exits with non zero code
+        logger.error(`Command exited with error code: ${code}`);
+        return onProcClosedWithError?.(code, stderrOutput);
+
         // return sendChat({
         //   isError: true,
         //   message: `Command exited with error code: ${code}\n${stderrOutput}`,

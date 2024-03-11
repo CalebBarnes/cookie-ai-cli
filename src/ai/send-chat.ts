@@ -1,14 +1,14 @@
 import ora from "ora";
-import { type Response } from "./ai-response-schema.js";
-import { getSettings } from "./settings/get-settings.js";
-import { handleAction } from "./handle-action.js";
-import { getHeaders } from "./settings/get-headers.js";
-import { logger } from "./utils/logger.js";
-import { colors } from "./utils/colors.js";
-import { baseInstructions } from "./settings/settings-constants.js";
-import { getSystemInstructions } from "./settings/get-system-instructions.js";
-import { askQuestion } from "./ask-question.js";
-import { type Settings } from "./settings/settings-schema.js";
+import { type Response } from "../ai-response-schema.js";
+import { getSettings } from "../settings/get-settings.js";
+import { handleAction } from "../handle-action.js";
+import { logger } from "../utils/logger.js";
+import { colors } from "../utils/colors.js";
+import { baseInstructions } from "../system-instructions/base-instructions.js";
+import { getSystemInstructions } from "../system-instructions/get-system-instructions.js";
+import { askQuestion } from "../utils/ask-question.js";
+import { type Settings } from "../settings/settings-schema.js";
+import { getHeaders } from "./get-headers.js";
 
 interface Payload {
   /**
@@ -25,6 +25,9 @@ interface Payload {
    *
    */
   temperature: number;
+  response_format?: {
+    type: "json_object";
+  };
 }
 interface Choice {
   message: { role: string; content: string };
@@ -61,6 +64,11 @@ export async function sendChat({
   if (settings.service === "custom" && settings.custom?.payload) {
     Object.assign(payload, settings.custom.payload);
   }
+  if (settings.service === "openai") {
+    payload.response_format = {
+      type: "json_object",
+    };
+  }
   if (settings.openai?.model) {
     payload.model = settings.openai.model;
   }
@@ -76,7 +84,6 @@ export async function sendChat({
       `Failed to resolve endpoint from settings: ${JSON.stringify(settings, null, 2)}`
     );
     return;
-    // process.exit(1);
   }
 
   logger.debug("payload");

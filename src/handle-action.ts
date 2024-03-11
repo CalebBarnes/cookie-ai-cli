@@ -2,10 +2,16 @@ import {
   type UserInfoRequiredMessageContent,
   type Response,
 } from "./ai-response-schema.js";
-import { askQuestion } from "./ask-question.js";
+import { askQuestion } from "./utils/ask-question.js";
 import { addItem } from "./commands/files.js";
 import { handleCommand } from "./handle-command.js";
 import { logger } from "./utils/logger.js";
+
+function handleProcError(code: number | null, stderrOutput: string): void {
+  console.log("HANDLE PROC ERROR HERE");
+  console.log({ code });
+  console.log({ stderrOutput });
+}
 
 export async function handleAction({ result }: { result: Response }): Promise<{
   success: boolean;
@@ -17,7 +23,7 @@ export async function handleAction({ result }: { result: Response }): Promise<{
 }> {
   switch (result.action) {
     case "command": {
-      await handleCommand(result);
+      await handleCommand(result, handleProcError);
       return { success: true };
     }
 

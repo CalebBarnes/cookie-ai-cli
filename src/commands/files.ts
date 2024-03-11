@@ -8,7 +8,7 @@ import { logger } from "../utils/logger.js";
 import { saveSettings } from "../settings/save-settings.js";
 import { colors } from "../utils/colors.js";
 import { writeToClipboard } from "../utils/write-to-clipboard.js";
-import { askQuestion } from "../ask-question.js";
+import { askQuestion } from "../utils/ask-question.js";
 
 export async function getFilesMessage(
   settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
@@ -40,9 +40,9 @@ export async function getFilesMessage(
         continue;
       }
 
-      contents += `${file}:
+      contents += `
+${path.relative(process.cwd(), file)}:
 ${fileContents}
-
 `;
     }
   } else {
