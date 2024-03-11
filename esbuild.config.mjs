@@ -9,7 +9,6 @@ try {
   process.exit(1);
 }
 
-console.log("🚀 Build starting... 🔥");
 await esbuild
   .build({
     entryPoints: ["src/index.ts"],
@@ -32,4 +31,3 @@ await esbuild
   .catch(() => process.exit(1));
 
 copyFileSync("src/ai-response-schema.ts", "dist/ai-response-schema.ts");
-console.log("🚀 Build completed. 🎉");
