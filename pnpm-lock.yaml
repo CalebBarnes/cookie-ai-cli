@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  best-effort-json-parser:
+    specifier: ^1.0.1
+    version: 1.0.1
   commander:
     specifier: ^12.0.0
     version: 12.0.0
@@ -1605,6 +1608,10 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: false
+
+  /best-effort-json-parser@1.0.1:
+    resolution: {integrity: sha512-Fbne5nLqmDQXUmHf6cxeFAAIcsiFaSbCBoK0Rt+wgWv/7SacNhViNeXnuf0H0wXupwW5Io8FfB1FHPUfZujwwg==}
     dev: false
 
   /bl@4.1.0:
