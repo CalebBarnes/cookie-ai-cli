@@ -37,13 +37,10 @@ Run "ai init" to create a new settings file.`);
       return validatedSettings;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        logger.error(`Error validating settings file: ${filePath}. 
-• ${error.message}`);
-        logger.error(
-          `
-You can edit your settings file manually to resolve the issue, or try reinitializing a new settings file by running ${colors.cyan}"ai init"${colors.reset}
-      `,
-          ""
+        logger.error(`Error validating settings file: ${filePath}.`);
+        logger.error(error.message);
+        logger.info(
+          `You can edit your settings file manually to resolve the issue, or try reinitializing a new settings file by running ${colors.cyan}"ai init"${colors.reset}`
         );
         process.exit(1);
       }
