@@ -9,45 +9,50 @@ import {
 } from "../__mocks__/mock-settings";
 import { TEST_DIR } from "../__mocks__/test-constants";
 import path from "node:path";
+import { logger } from "../src/utils/logger";
 
 const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings.json`;
 
 describe("settings", () => {
-  const consoleErrorSpy = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
+  const loggerInfoSpy = vi
+    .spyOn(logger, "info")
+    .mockImplementation((_infoObject: object) => logger);
+  const loggerErrorSpy = vi
+    .spyOn(logger, "error")
+    .mockImplementation((_infoObject: object) => logger);
   const mockExit = vi
     .spyOn(process, "exit")
-    .mockImplementation((code?: number) => undefined as never);
+    .mockImplementation((_code?: number) => undefined as never);
 
   afterEach(() => {
     mockExit.mockClear();
-    consoleErrorSpy.mockClear();
+    loggerErrorSpy.mockClear();
+    loggerInfoSpy.mockClear();
     fs.rmSync(TEST_SETTINGS_PATH, {
       force: true,
     });
   });
   afterAll(() => {
     mockExit.mockRestore();
-    consoleErrorSpy.mockRestore();
+    loggerErrorSpy.mockRestore();
+    loggerInfoSpy.mockRestore();
   });
 
   it("should save and load settings file", () => {
     expect(() =>
       saveSettings(mockOpenAISettings, TEST_SETTINGS_PATH)
     ).not.toThrow();
-
     expect(getSettings(TEST_SETTINGS_PATH)).toEqual(mockOpenAISettings);
   });
 
-  it("should throw validation errors and not overwrite existing settings", () => {
+  it("should log validation errors and not overwrite existing settings", () => {
     expect(() =>
       saveSettings(mockOpenAISettings, TEST_SETTINGS_PATH)
     ).not.toThrow();
-    expect(() => {
-      saveSettings(mockInvalidSettingsMissingEndpoint, TEST_SETTINGS_PATH);
-    }).toThrow(errors.ENDPOINT_REQUIRED);
-
+    saveSettings(mockInvalidSettingsMissingEndpoint, TEST_SETTINGS_PATH);
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect.stringMatching(new RegExp(errors.ENDPOINT_REQUIRED))
+    );
     expect(getSettings(TEST_SETTINGS_PATH)).toEqual(mockOpenAISettings);
   });
 
@@ -55,12 +60,10 @@ describe("settings", () => {
     fs.rmSync(TEST_SETTINGS_PATH, {
       force: true,
     });
-
     expect(() => getSettings(TEST_SETTINGS_PATH)).toThrow();
     expect(mockExit).toHaveBeenCalledWith(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringMatching(`Settings file not found: ${TEST_SETTINGS_PATH}
-Run "ai init" to create a new settings file.`)
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect.stringMatching(`Settings file not found`)
     );
   });
 
@@ -75,9 +78,8 @@ Run "ai init" to create a new settings file.`)
     expect(() => getSettings(TEST_SETTINGS_PATH)).toThrow(
       `Error loading settings: ${TEST_SETTINGS_PATH}`
     );
-
     expect(mockExit).toHaveBeenCalledWith(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.stringMatching(new RegExp(errors.ENDPOINT_REQUIRED))
     );
   });

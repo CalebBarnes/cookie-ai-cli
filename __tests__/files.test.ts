@@ -11,6 +11,7 @@ import {
   getFilesMessage,
   removeItem,
 } from "../src/commands/files";
+import { logger } from "../src/utils/logger";
 
 const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings-files.json`;
 
@@ -26,15 +27,19 @@ describe("files", () => {
   });
 
   it("should log that no files are added yet", () => {
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const loggerSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation((_infoObject: object) => logger);
+
     listFiles(TEST_SETTINGS_PATH);
-    expect(consoleSpy).toHaveBeenCalledWith(
+
+    expect(loggerSpy).toHaveBeenCalledWith(
       expect.stringMatching(
         /No files added. You can use the "files add" command to add files to the list./
       )
     );
 
-    consoleSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 
   it("should add a file then list the files", () => {
@@ -96,9 +101,10 @@ describe("files", () => {
     const text = await getFilesMessage(TEST_SETTINGS_PATH);
 
     expect(text).toEqual(
-      `${path.resolve(TEST_FILE_PATH)}:\nHello, World!\n\n${path.resolve(
+      `\n${path.relative(process.cwd(), TEST_FILE_PATH)}:\nHello, World!\n\n${path.relative(
+        process.cwd(),
         TEST_FILE_PATH + 2
-      )}:\nHello, World!\n\n`
+      )}:\nHello, World!\n`
     );
 
     fs.rmSync(TEST_FILE_PATH);
