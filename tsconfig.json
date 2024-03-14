@@ -1,19 +1,29 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Node16",
     "resolveJsonModule": true,
     "sourceMap": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleDetection": "force",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "pretty": true,
+    "newLine": "lf",
+    "stripInternal": true,
+    "noEmitOnError": true,
+    "useDefineForClassFields": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
