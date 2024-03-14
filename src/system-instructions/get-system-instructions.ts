@@ -1,22 +1,19 @@
 import path from "node:path";
 import { getFilesMessage } from "../commands/files.js";
-import { getSettings } from "../settings/get-settings.js";
-import { DEFAULT_SETTINGS_FILE_PATH } from "../settings/settings-constants.js";
+import { type Settings } from "../settings/settings-schema.js";
 import { baseInstructions } from "./base-instructions.js";
 
 export async function getSystemInstructions(
-  settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
+  settings: Settings
 ): Promise<string> {
   let instructions = baseInstructions;
-
-  const settings = getSettings(settingsFilePath);
 
   if (
     settings.files &&
     Array.isArray(settings.files) &&
     settings.files.length
   ) {
-    const filesMessageContent = await getFilesMessage();
+    const filesMessageContent = await getFilesMessage(settings);
     const relativeFiles = settings.files
       .map((file) => path.relative(process.cwd(), file))
       .join(`, `);

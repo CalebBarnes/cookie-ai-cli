@@ -9,7 +9,7 @@ export function askQuestion(
   return new Promise((resolve) => {
     let fullQuery = `${colors.cyan}${query}${colors.reset}`;
     if (Array.isArray(options) && options.length > 0) {
-      fullQuery += "\n";
+      fullQuery = String(fullQuery);
       options.forEach((option, index) => {
         fullQuery += `${index + 1}. ${option}\n`;
       });

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+// #!/usr/bin/env node
 import { Command } from "commander";
 import packageJson from "../package.json";
 import { registerInitCommand } from "./commands/init.js";

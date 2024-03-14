@@ -9,12 +9,9 @@ import { saveSettings } from "../settings/save-settings.js";
 import { colors } from "../utils/colors.js";
 import { writeToClipboard } from "../utils/write-to-clipboard.js";
 import { askQuestion } from "../utils/ask-question.js";
+import { type Settings } from "../settings/settings-schema.js";
 
-export async function getFilesMessage(
-  settingsFilePath = DEFAULT_SETTINGS_FILE_PATH
-): Promise<string> {
-  const settings = getSettings(settingsFilePath);
-
+export async function getFilesMessage(settings: Settings): Promise<string> {
   let contents = ``;
   if (settings.files?.length) {
     for (const file of settings.files) {
@@ -167,7 +164,8 @@ export function listFiles(filePath = DEFAULT_SETTINGS_FILE_PATH): void {
 }
 
 async function copyFilesToClipboard(): Promise<void> {
-  const text = await getFilesMessage();
+  const settings = getSettings();
+  const text = await getFilesMessage(settings);
   writeToClipboard(text);
 }
 

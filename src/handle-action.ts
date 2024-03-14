@@ -13,7 +13,13 @@ function handleProcError(code: number | null, stderrOutput: string): void {
   console.log({ stderrOutput });
 }
 
-export async function handleAction({ result }: { result: Response }): Promise<{
+export async function handleAction({
+  response,
+  answer,
+}: {
+  response: Response;
+  answer: "y" | "n";
+}): Promise<{
   success: boolean;
   filesLoaded?: boolean;
   error?: {
@@ -21,41 +27,37 @@ export async function handleAction({ result }: { result: Response }): Promise<{
     message: string;
   };
 }> {
-  switch (result.action) {
+  switch (response.action) {
     case "command": {
-      await handleCommand(result, handleProcError);
-      return { success: true };
+      const result = await handleCommand(response, answer, handleProcError);
+      return result;
     }
 
-    case "command_list": {
-      await commandListAction(result);
-      return { success: true };
-    }
+    // case "command_list": {
+    //   // await commandListAction(result, answer, handleProcError);
+    // }
 
-    case "user_info_required": {
-      await userInfoRequiredAction(result);
-      return { success: true };
-    }
+    // case "user_info_required": {
+    //   await userInfoRequiredAction(result);
+    // }
 
-    case "message_to_user": {
-      logger.info(result.message);
-      return { success: true };
-    }
+    // case "message_to_user": {
+    //   logger.info(result.message);
+    // }
 
-    case "request_file_access": {
-      await requestFileAccessAction(result);
-      return { success: true, filesLoaded: true };
-    }
+    // case "request_file_access": {
+    //   await requestFileAccessAction(result);
+    // }
 
     default: {
-      const unknownResult = result as {
+      const unknownResponse = response as {
         action?: string;
       };
       return {
         success: false,
         error: {
           code: "unsupported_action",
-          message: `${unknownResult.action ? `${unknownResult.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
+          message: `${unknownResponse.action ? `${unknownResponse.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
         },
       };
     }
@@ -79,41 +81,45 @@ export async function requestFileAccessAction({
   }
 }
 
-export async function commandListAction({
-  commands,
-  description,
-}: {
-  commands: string[];
-  description: string;
-}): Promise<void> {
-  for (const command of commands) {
-    await handleCommand({ command, description });
-  }
-}
+// export async function commandListAction(
+//   {
+//     commands,
+//     description,
+//   }: {
+//     commands: string[];
+//     description: string;
+//   },
+//   answer: "y" | "n",
+//   handleProcError: (code: number | null, stderrOutput: string) => void
+// ): Promise<void> {
+//   for (const command of commands) {
+//     await handleCommand({ command, description }, answer, handleProcError);
+//   }
+// }
 
-export async function userInfoRequiredAction(
-  result: UserInfoRequiredMessageContent
-): Promise<void> {
-  const values = {} as Record<string, string>;
-  for (const item of result.values) {
-    const answer = await askQuestion(item.label);
-    values[item.value] = answer;
-  }
+// export async function userInfoRequiredAction(
+//   result: UserInfoRequiredMessageContent
+// ): Promise<void> {
+//   const values = {} as Record<string, string>;
+//   for (const item of result.values) {
+//     const answer = await askQuestion(item.label);
+//     values[item.value] = answer;
+//   }
 
-  if (result.suggested_command_list) {
-    for (const command of result.suggested_command_list) {
-      await handleCommand({
-        command,
-        values,
-        description: result.description,
-      });
-    }
-  }
-  if (result.suggested_command) {
-    await handleCommand({
-      command: result.suggested_command,
-      values,
-      description: result.description,
-    });
-  }
-}
+//   if (result.suggested_command_list) {
+//     for (const command of result.suggested_command_list) {
+//       await handleCommand({
+//         command,
+//         values,
+//         description: result.description,
+//       });
+//     }
+//   }
+//   if (result.suggested_command) {
+//     await handleCommand({
+//       command: result.suggested_command,
+//       values,
+//       description: result.description,
+//     });
+//   }
+// }

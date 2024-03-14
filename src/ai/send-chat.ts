@@ -53,17 +53,19 @@ export async function sendChat({
   logger.debug(message);
   logger.debug({ isError });
 
+  const settings = getSettings();
+
   if (payload.messages[0]) {
-    const systemInstructions = await getSystemInstructions();
+    const systemInstructions = await getSystemInstructions(settings);
     logger.debug("systemInstructions");
     logger.debug(systemInstructions);
     payload.messages[0].content = systemInstructions;
   }
 
-  const settings = getSettings();
   if (settings.service === "custom" && settings.custom?.payload) {
     Object.assign(payload, settings.custom.payload);
   }
+
   if (settings.service === "openai") {
     payload.response_format = {
       type: "json_object",
