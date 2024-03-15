@@ -1,7 +1,7 @@
 import { type Command } from "commander";
+import { type Instance } from "ink";
 import { client } from "../ai/client.js";
 import { renderCommandPreview } from "../ui/command-preview.js";
-import { askQuestion } from "../utils/ask-question.js";
 import { type Response } from "../ai-response-schema.js";
 import { type Operation, handleFilesCommand } from "./files.js";
 
@@ -15,32 +15,80 @@ export function registerPromptCommand(program: Command): void {
     });
 }
 
-async function handlePrompt(prompt: string): Promise<void> {
-  if (prompt.startsWith("files")) {
+async function handlePrompt(prompt?: string): Promise<void> {
+  if (prompt?.startsWith("files")) {
     const [_command, operation, ...files] = prompt.split(" ");
     return handleFilesCommand(operation as Operation, files);
   }
-  const userPrompt = prompt || (await askQuestion("➜"));
 
-  let instance = renderCommandPreview({
-    prompt: userPrompt,
-    isLoading: true,
-  });
+  let userPrompt = prompt;
 
-  client.on("message", (message?: Response) => {
-    instance = renderCommandPreview({
-      prompt: userPrompt,
-      ...(message ?? {}),
-      isLoading: true,
+  function handleSubmitPrompt(msg: string): void {
+    userPrompt = msg;
+
+    client.sendChat(msg).catch((err) => {
+      console.error(err);
     });
-  });
-  const response = await client.sendChat(userPrompt);
+  }
+
+  function handleConfirm(): void {
+    client.off("message", handleMessage);
+    client.off("completed", handleCompleted);
+    instance?.unmount();
+    console.log("Confirmed!!!");
+  }
+
+  function handleCancel(): void {
+    client.off("message", handleMessage);
+    client.off("completed", handleCompleted);
+    instance?.unmount();
+    console.log("Cancelled!!!");
+    handlePrompt().catch(console.error);
+  }
+
+  function handleMessage(message?: Partial<Response>): void {
+    instance = renderCommandPreview(
+      {
+        prompt: userPrompt,
+        isLoading: true,
+        onConfirm: handleConfirm,
+        onCancel: handleCancel,
+      },
+      message
+    );
+  }
+
+  function handleCompleted(message?: Partial<Response>): void {
+    instance = renderCommandPreview(
+      {
+        prompt: userPrompt,
+        isLoading: false,
+        onConfirm: handleConfirm,
+        onCancel: handleCancel,
+      },
+      message
+    );
+    client.off("message", handleMessage);
+    client.off("completed", handleCompleted);
+  }
+
+  let instance: Instance | undefined;
+  client.on("message", handleMessage);
+  client.on("completed", handleCompleted);
 
   instance = renderCommandPreview({
+    onSubmitPrompt: handleSubmitPrompt,
     prompt: userPrompt,
-    ...(response ?? {}),
-    isLoading: false,
+    isLoading: true,
+    onConfirm: handleConfirm,
+    onCancel: handleCancel,
   });
-  instance.unmount();
-  await handlePrompt(await askQuestion("➜"));
+
+  if (userPrompt) {
+    instance = renderCommandPreview({
+      prompt: userPrompt,
+      isLoading: true,
+    });
+    await client.sendChat(userPrompt);
+  }
 }
