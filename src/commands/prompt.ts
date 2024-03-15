@@ -42,7 +42,7 @@ async function handlePrompt(prompt?: string): Promise<void> {
     client.off("message", handleMessage);
     client.off("completed", handleCompleted);
     instance?.unmount();
-    console.log("Cancelled!!!");
+    console.log("Command aborted.\n");
     handlePrompt().catch(console.error);
   }
 
