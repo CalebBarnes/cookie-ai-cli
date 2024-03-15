@@ -1,34 +1,71 @@
 import React, { useState } from "react";
-import { type Instance, render } from "ink";
+import { type Instance, render, Box, Text } from "ink";
 import {
   type CommandMessageContent,
-  // type CommandMessageContent,
   type Response,
 } from "../ai-response-schema.js";
-// import { LoadingSpinner, ProgressBar } from "./loading-spinner.js";
-// import { SelectArrow } from "./select-arrow.js";
 import { CommandInput } from "./command-input.js";
 import { SingleCommandPreview } from "./actions/single-command.js";
-// import { SingleCommand } from "./actions/single-command.js";
+import { ProgressBar } from "./loading-spinner.js";
 
 export interface CommandPreviewProps {
+  onSubmitPrompt?: (msg: string) => void;
+  onConfirm?: () => void;
+  onCancel?: () => void;
   prompt?: string;
   isLoading?: boolean;
   isError?: boolean;
+  response?: Partial<Response>;
 }
+
+export function renderCommandPreview(
+  props: CommandPreviewProps,
+  response?: Partial<Response>
+): Instance {
+  return render(<CommandPreview {...props} response={response} />);
+}
+
 export function CommandPreview({
+  onConfirm,
+  onCancel,
+  onSubmitPrompt,
   prompt,
-  action,
-}: CommandPreviewProps & Partial<Response>): React.ReactNode {
-  const [userPrompt, setUserPrompt] = useState<string>(prompt ?? "");
+  response,
+  isLoading,
+  isError,
+}: CommandPreviewProps): React.ReactNode {
+  const [userPrompt, setUserPrompt] = useState<string | undefined>(prompt);
 
   return (
     <>
       {userPrompt ? (
-        <CommandAction prompt={userPrompt} action={action} />
+        <>
+          <Box>
+            <Text color="cyan">* </Text>
+            <Text color="white">{userPrompt} </Text>
+            {!isLoading && !isError && (
+              <Text>
+                <Text color="green">✔</Text>
+              </Text>
+            )}
+            {isError && !isLoading && (
+              <Text>
+                <Text color="red">✘</Text>
+              </Text>
+            )}
+            {isLoading && <ProgressBar />}
+          </Box>
+          <CommandAction
+            prompt={userPrompt}
+            response={response}
+            onConfirm={onConfirm}
+            onCancel={onCancel}
+          />
+        </>
       ) : (
         <CommandInput
           onSubmit={(msg) => {
+            onSubmitPrompt?.(msg);
             setUserPrompt(msg);
           }}
         />
@@ -38,16 +75,24 @@ export function CommandPreview({
 }
 
 function CommandAction({
-  action,
   prompt,
-  ...rest
-}: { prompt: string } & Response): React.ReactNode {
-  switch (action) {
+  response,
+  onConfirm,
+  onCancel,
+}: {
+  prompt: string;
+  response?: Partial<Response>;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}): React.ReactNode {
+  switch (response?.action) {
     case "command":
       return (
         <SingleCommandPreview
+          onConfirm={onConfirm}
+          onCancel={onCancel}
           prompt={prompt}
-          {...(rest as CommandMessageContent)}
+          response={response as Partial<CommandMessageContent>}
         />
       );
     // case "command_list":
@@ -56,32 +101,4 @@ function CommandAction({
     default:
       return null;
   }
-}
-
-// function CommandListPreview({
-//   prompt,
-//   isLoading,
-//   isError,
-// }: CommandPreviewProps): React.ReactNode {
-//   return (
-//     <Box>
-//       <Text color="cyan">* </Text>
-//       <Text color="white">{prompt} </Text>
-//       {!isLoading && !isError && (
-//         <Text>
-//           <Text color="green">✔</Text>
-//         </Text>
-//       )}
-//       {isError && !isLoading && (
-//         <Text>
-//           <Text color="red">✘</Text>
-//         </Text>
-//       )}
-//       {isLoading && <LoadingSpinner />}
-//     </Box>
-//   );
-// }
-
-export function renderCommandPreview(props: CommandPreviewProps): Instance {
-  return render(<CommandPreview {...props} />);
 }
