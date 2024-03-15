@@ -49,6 +49,7 @@ export class ChatService extends EventEmitter {
     }
 
     this.messages.push({ role: "assistant", content: response });
+    this.emit("completed", parsedJson);
 
     return parsedJson;
   }
