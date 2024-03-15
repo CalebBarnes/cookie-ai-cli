@@ -1,45 +1,37 @@
 import { Box, Text } from "ink";
 import React from "react";
-import { LoadingSpinner, ProgressBar } from "../loading-spinner.js";
+import { ConfirmInput } from "@inkjs/ui";
+import { LoadingSpinner } from "../loading-spinner.js";
 import { type CommandMessageContent } from "../../ai-response-schema.js";
 import { SelectArrow } from "../select-arrow.js";
 
 export function SingleCommandPreview({
+  onConfirm,
+  onCancel,
   prompt,
-  command,
-  description,
   isLoading = false,
-  isError = false,
+  // isError = false,
+  response,
 }: {
+  onConfirm?: () => void;
+  onCancel?: () => void;
   prompt: string;
   isLoading?: boolean;
   isError?: boolean;
-} & Partial<CommandMessageContent>): React.ReactNode {
+  response?: Partial<CommandMessageContent>;
+}): React.ReactNode {
   const estimatedWidth =
-    Math.max(prompt.length, command?.length ?? 0, description?.length ?? 0) +
-    10;
+    Math.max(
+      prompt.length,
+      response?.command?.length ?? 0,
+      response?.description?.length ?? 0
+    ) + 10;
 
   return (
     <>
       <Box>
-        <Text color="cyan">* </Text>
-        <Text color="white">{prompt} </Text>
-        {!isLoading && !isError && (
-          <Text>
-            <Text color="green">✔</Text>
-          </Text>
-        )}
-        {isError && !isLoading && (
-          <Text>
-            <Text color="red">✘</Text>
-          </Text>
-        )}
-        {isLoading && <ProgressBar />}
-      </Box>
-
-      <Box>
         <Text color="cyan">{">"} </Text>
-        <Text color="yellow">{command ?? <LoadingSpinner />}</Text>
+        <Text color="yellow">{response?.command ?? <LoadingSpinner />}</Text>
       </Box>
 
       <Box
@@ -55,13 +47,24 @@ export function SingleCommandPreview({
           <Text underline color="cyan">
             ℹ
           </Text>
-          <Text color="white"> {description ?? <LoadingSpinner />}</Text>
+          <Text color="white">
+            {" "}
+            {response?.description ?? <LoadingSpinner />}
+          </Text>
         </Box>
 
         <Box>
           <Text color={isLoading ? "gray" : ""}>
             <SelectArrow isSelected={true} />
-            Run this command? <Text color="gray">(y/n)</Text>
+            Run this command?{" "}
+            <ConfirmInput
+              onConfirm={() => {
+                onConfirm?.();
+              }}
+              onCancel={() => {
+                onCancel?.();
+              }}
+            />
           </Text>
         </Box>
       </Box>
