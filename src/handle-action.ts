@@ -1,7 +1,4 @@
-import {
-  type UserInfoRequiredMessageContent,
-  type Response,
-} from "./ai-response-schema.js";
+import { type Response } from "./ai-response-schema.js";
 import { askQuestion } from "./utils/ask-question.js";
 import { addItem } from "./commands/files.js";
 import { handleCommand } from "./handle-command.js";
@@ -15,21 +12,16 @@ function handleProcError(code: number | null, stderrOutput: string): void {
 
 export async function handleAction({
   response,
-  answer,
 }: {
   response: Response;
   answer: "y" | "n";
 }): Promise<{
   success: boolean;
-  filesLoaded?: boolean;
-  error?: {
-    code: string;
-    message: string;
-  };
+  message?: string;
 }> {
   switch (response.action) {
     case "command": {
-      const result = await handleCommand(response, answer, handleProcError);
+      const result = await handleCommand(response, handleProcError);
       return result;
     }
 
@@ -55,10 +47,10 @@ export async function handleAction({
       };
       return {
         success: false,
-        error: {
-          code: "unsupported_action",
-          message: `${unknownResponse.action ? `${unknownResponse.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
-        },
+        message: `${unknownResponse.action ? `${unknownResponse.action} is not` : "You didn't use"} a supported action. Make sure you respond ONLY with JSON that satisfies the Response type.`,
+        // error: {
+        //   code: "unsupported_action",
+        // },
       };
     }
   }

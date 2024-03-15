@@ -3,30 +3,15 @@ import { colors } from "./utils/colors.js";
 import { logger } from "./utils/logger.js";
 import { type CommandMessageContent } from "./ai-response-schema.js";
 
-export async function handleCommand(
-  result: CommandMessageContent,
-  onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
-): Promise<{ success: boolean }> {
-  const { command } = result;
-  // let fullCommand = command;
-  // if (values) {
-  //   fullCommand = command.replaceAll(/{(?<temp1>\w+)}/g, (_, match) => {
-  //     const keyWithBraces = `{${match}}`;
-  //     return values[keyWithBraces] ?? `{${match}}`;
-  //   });
-  // }
-
-  const res = await spawnProcAndExecuteCommand(command, onProcClosedWithError);
-  return res;
-}
-
-function spawnProcAndExecuteCommand(
-  command: string,
+export function handleCommand(
+  response: CommandMessageContent,
   onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
 ): Promise<
-  | { success: true }
+  | { success: boolean }
   | { success: false; error: { code: number | null; stderrOutput: string } }
 > {
+  const { command } = response;
+
   return new Promise((resolve, reject) => {
     logger.info(`Executing command: ${colors.blue}${command}${colors.reset}`);
 
@@ -69,3 +54,27 @@ function spawnProcAndExecuteCommand(
     });
   });
 }
+
+// function spawnProcAndExecuteCommand(
+//   command: string,
+//   onProcClosedWithError?: (code: number | null, stderrOutput: string) => void
+// ): Promise<
+//   | { success: true }
+//   | { success: false; error: { code: number | null; stderrOutput: string } }
+// > {
+
+// }
+
+// function getFullCommand(
+//   command: string,
+//   values?: Record<string, string>
+// ): string {
+//   let fullCommand = command;
+//   if (values) {
+//     fullCommand = command.replaceAll(/{(?<temp1>\w+)}/g, (_, match) => {
+//       const keyWithBraces = `{${match}}`;
+//       return values[keyWithBraces] ?? `{${match}}`;
+//     });
+//   }
+//   return fullCommand;
+// }
