@@ -7,11 +7,11 @@ import {
   mockInvalidSettingsMissingEndpoint,
   mockOpenAISettings,
 } from "../__mocks__/mock-settings";
-import { TEST_DIR } from "../__mocks__/test-constants";
+import { TEMP_TEST_DIR } from "../__mocks__/test-constants";
 import path from "node:path";
 import { logger } from "../src/utils/logger";
 
-const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings.json`;
+const TEST_SETTINGS_PATH = `${TEMP_TEST_DIR}/test-settings.json`;
 
 describe("settings", () => {
   const loggerInfoSpy = vi
