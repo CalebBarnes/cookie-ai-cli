@@ -10,7 +10,4 @@ export const mockOpenAISettings: Settings = {
 
 export const mockInvalidSettingsMissingEndpoint: Settings = {
   service: "custom",
-  custom: {
-    model: "gpt-4",
-  },
 };

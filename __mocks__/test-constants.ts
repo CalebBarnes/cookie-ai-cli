@@ -1,1 +1,1 @@
-export const TEST_DIR = "./.tmp";
+export const TEMP_TEST_DIR = "./.tmp";

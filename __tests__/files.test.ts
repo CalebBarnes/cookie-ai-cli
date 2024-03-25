@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it, vi, expect, afterEach, beforeEach } from "vitest";
 import { mockOpenAISettings } from "../__mocks__/mock-settings";
-import { TEST_DIR } from "../__mocks__/test-constants";
+import { TEMP_TEST_DIR } from "../__mocks__/test-constants";
 import { getSettings } from "../src/settings/get-settings";
 import { saveSettings } from "../src/settings/save-settings";
 import {
@@ -13,7 +13,7 @@ import {
 } from "../src/commands/files";
 import { logger } from "../src/utils/logger";
 
-const TEST_SETTINGS_PATH = `${TEST_DIR}/test-settings-files.json`;
+const TEST_SETTINGS_PATH = `${TEMP_TEST_DIR}/test-settings-files.json`;
 
 describe("files", () => {
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe("files", () => {
   });
 
   it("should add a file then list the files", () => {
-    const TEST_FILE_PATH = `${TEST_DIR}/hello_world.txt`;
+    const TEST_FILE_PATH = `${TEMP_TEST_DIR}/hello_world.txt`;
 
     fs.writeFileSync(TEST_FILE_PATH, "Hello, World!");
 
@@ -66,7 +66,7 @@ describe("files", () => {
   });
 
   it("should add and remove a file", () => {
-    const TEST_FILE_PATH = `${TEST_DIR}/hello_world.txt`;
+    const TEST_FILE_PATH = `${TEMP_TEST_DIR}/hello_world.txt`;
 
     fs.writeFileSync(TEST_FILE_PATH, "Hello, World!");
 
@@ -90,7 +90,7 @@ describe("files", () => {
   });
 
   it("should get file contents message text", async () => {
-    const TEST_FILE_PATH = `${TEST_DIR}/hello_world.txt`;
+    const TEST_FILE_PATH = `${TEMP_TEST_DIR}/hello_world.txt`;
 
     fs.writeFileSync(TEST_FILE_PATH, "Hello, World!");
     fs.writeFileSync(TEST_FILE_PATH + 2, "Hello, World!");
@@ -98,7 +98,8 @@ describe("files", () => {
     addItem([TEST_FILE_PATH], TEST_SETTINGS_PATH);
     addItem([TEST_FILE_PATH + 2], TEST_SETTINGS_PATH);
 
-    const text = await getFilesMessage(TEST_SETTINGS_PATH);
+    const settings = getSettings(TEST_SETTINGS_PATH);
+    const text = await getFilesMessage(settings);
 
     expect(text).toEqual(
       `\n${path.relative(process.cwd(), TEST_FILE_PATH)}:\nHello, World!\n\n${path.relative(
